@@ -1,39 +1,68 @@
 import streamlit as st
-import streamlit_authenticator as stauth
+from supabase import create_client
 import pandas as pd
-import plotly.express as px
 
-# 1. Page Config
-st.set_page_config(page_title="Aura Fitness", layout="wide")
+# I have plugged in your keys here so you don't have to!
+URL = "https://uetvrqirjmbgodcbsruh.supabase.co"
+KEY = "sb_publishable_6lw0WScY9K1LJ4Itwmw4Eg_07kYJdlC"
 
-# 2. Setup (We will add the 'Registration' logic next)
-st.title("🏃‍♂️ Aura Fitness")
+supabase = create_client(URL, KEY)
 
-# 3. Sidebar Navigation
-menu = ["Home", "My Performance", "Buddy Group", "AI Coach"]
-choice = st.sidebar.selectbox("Navigate", menu)
+st.set_page_config(page_title="Aura Collab Tracker", layout="wide")
+st.title("🤝 Aura Collab: Steps & Sleep")
 
-if choice == "Home":
-    st.subheader("Welcome to Aura Performance")
-    st.write("Join the elite. Track metrics. Share progress.")
+# Phase: Identity & Mode
+with st.sidebar:
+    st.header("Profile")
+    name = st.text_input("Your Name", placeholder="Enter your name...")
+    mode = st.radio("Navigation", ["Solo Tracking", "Group Collaboration"])
 
-elif choice == "Buddy Group":
-    st.header("🤝 Buddy Community")
-    tab1, tab2 = st.tabs(["Join/Create Group", "Group Feed"])
+if mode == "Group Collaboration":
+    st.subheader("👥 Group Mode")
+    group_code = st.text_input("Enter Group Name/Code", placeholder="e.g. 'Team-Alpha'")
     
-    with tab1:
-        st.write("Connect with your training partners.")
-        group_id = st.text_input("Enter Buddy Group Code (e.g., AURA-X)")
-        if st.button("Link Account"):
-            st.success(f"Linked to group: {group_id}")
-            
-    with tab2:
-        st.subheader("Live Progress Feed")
-        # Example of shared data
-        buddy_data = pd.DataFrame({
-            "Athlete": ["You", "Buddy_Alpha", "Buddy_Beta"],
-            "Weekly Points": [450, 320, 510]
-        })
-        st.bar_chart(buddy_data.set_index("Athlete"))
+    if group_code:
+        # Create a universal invite message
+        invite_msg = f"Join my Aura fitness group! Open the app and enter group code: {group_code}"
+        st.info(f"**Invite others:** Copy this message to Email or Text:\n\n`{invite_msg}`")
 
-# 4. Login Gate (To be added once the database is connected)
+    # Input Section
+    st.divider()
+    c1, c2 = st.columns(2)
+    with c1:
+        steps = st.number_input("Steps Walked", min_value=0, step=1)
+    with c2:
+        sleep = st.number_input("Hours Slept", min_value=0.0, step=0.5)
+
+    if st.button("Update Stats to Group"):
+        if name and group_code:
+            data = {"username": name, "group_name": group_code, "steps": steps, "sleep_hours": sleep}
+            # This saves it to the database table we created earlier
+            supabase.table("aura_collab_tracker").insert(data).execute()
+            st.success(f"Stats synced to {group_code}!")
+        else:
+            st.error("Please enter both your name and a group code.")
+
+    # Leaderboard Section
+    if group_code:
+        st.divider()
+        st.subheader(f"Live Board: {group_code}")
+        res = supabase.table("aura_collab_tracker").select("*").eq("group_name", group_code).order('created_at', desc=True).execute()
+        if res.data:
+            df = pd.DataFrame(res.data)
+            st.dataframe(df[["username", "steps", "sleep_hours", "created_at"]], use_container_width=True)
+
+else:
+    st.subheader("🧘 Solo Tracking")
+    # Solo logic: Filter by name only
+    st.info("In Solo mode, your data is only visible to you (filtered by your name).")
+    c1, c2 = st.columns(2)
+    with c1:
+        s_steps = st.number_input("Steps", min_value=0)
+    with c2:
+        s_sleep = st.number_input("Sleep", min_value=0.0)
+    
+    if st.button("Save Solo Stats"):
+        data = {"username": name, "group_name": "Solo", "steps": s_steps, "sleep_hours": s_sleep}
+        supabase.table("aura_collab_tracker").insert(data).execute()
+        st.success("Solo stats saved!")
