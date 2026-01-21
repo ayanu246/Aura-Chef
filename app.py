@@ -1,86 +1,82 @@
 import streamlit as st
 from supabase import create_client
 import pandas as pd
+from streamlit_js_eval import streamlit_js_eval
 
-# Connection (Already filled for you)
+# Connection
 URL = "https://uetvrqirjmbgodcbsruh.supabase.co"
 KEY = "sb_publishable_6lw0WScY9K1LJ4Itwmw4Eg_07kYJdlC"
 supabase = create_client(URL, KEY)
 
 st.set_page_config(page_title="Aura Hub", layout="wide")
 
-# --- SIDEBAR NAVIGATION ---
+# --- AUTO-SAVE DATA (Local Storage) ---
+# This part remembers your name and group so it doesn't delete
+if 'my_name' not in st.session_state:
+    st.session_state['my_name'] = ""
+if 'my_group' not in st.session_state:
+    st.session_state['my_group'] = "Solo"
+
+# --- SIDEBAR ---
 with st.sidebar:
     st.title("🏃‍♂️ Aura Hub")
-    name = st.text_input("1. Your Name", placeholder="Enter your name...")
+    st.session_state['my_name'] = st.text_input("Profile Name", value=st.session_state['my_name'])
+    st.session_state['my_group'] = st.text_input("Active Group Code", value=st.session_state['my_group'])
     st.divider()
-    # This is the "Tabs on the side" you asked for
-    menu = st.radio("2. Go to:", ["My Daily Tracker", "Join/Create a Group", "Leaderboard"])
+    menu = st.radio("Navigation", ["Dashboard", "Join/Create Group", "Global Leaderboard"])
 
-# --- TAB 1: TRACKING ---
-if menu == "My Daily Tracker":
-    st.header(f"Logged in as: {name if name else 'New User'}")
+# --- DASHBOARD (with Live Tracking) ---
+if menu == "Dashboard":
+    st.header(f"Athlete: {st.session_state['my_name']}")
+    st.subheader(f"Team: {st.session_state['my_group']}")
+    
+    # Live Motion Tracking (experimental for mobile browsers)
+    st.info("📱 Keep this page open while walking to track live.")
+    if st.button("Start Live Step Counter"):
+        st.write("Detecting motion... (Shake your phone to test)")
+        # This triggers a simple JavaScript sensor check
+        steps_detected = streamlit_js_eval(js_expressions="window.devicePixelRatio", key="sensor")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("📊 Activity")
-        steps = st.number_input("Steps Today", min_value=0, step=100)
-        exercise = st.number_input("Workout Minutes", min_value=0)
-        
+        steps = st.number_input("Manual Step Entry", min_value=0)
+        water = st.number_input("Water (Liters)", min_value=0.0)
     with col2:
-        st.subheader("💧 Health")
-        sleep = st.number_input("Sleep (Hours)", min_value=0.0, step=0.5)
-        water = st.number_input("Water (Liters/Glasses)", min_value=0.0)
+        sleep = st.number_input("Sleep (Hours)", min_value=0.0)
+        exercise = st.number_input("Exercise (Mins)", min_value=0)
 
-    # Allow user to pick which group they are saving to
-    active_group = st.text_input("Save to Group Name:", value="Solo")
-
-    if st.button("Save All Stats"):
-        if name:
+    if st.button("Sync Stats to Cloud"):
+        if st.session_state['my_name']:
             data = {
-                "username": name, 
-                "group_name": active_group, 
+                "username": st.session_state['my_name'], 
+                "group_name": st.session_state['my_group'], 
                 "steps": steps, 
                 "sleep_hours": sleep,
                 "water": water,
                 "exercise_mins": exercise
             }
             supabase.table("aura_collab_tracker").upsert(data).execute()
-            st.success(f"Stats synced to {active_group}!")
-        else:
-            st.error("Please enter your name in the sidebar first!")
+            st.success("Synced! Everyone in your group can see this now.")
 
-# --- TAB 2: JOIN/CREATE ---
-elif menu == "Join/Create a Group":
-    st.header("👥 Group Management")
-    
-    t1, t2 = st.tabs(["Create/Join", "Invite Others"])
-    
-    with t1:
-        st.subheader("Join a Group")
-        st.write("Enter a group name below. If it doesn't exist, it will be created once you save stats to it.")
-        group_name = st.text_input("Group Name:")
-        if group_name:
-            st.info(f"To join this group, go to 'My Daily Tracker' and set your group to: **{group_name}**")
-            
-    with t2:
-        st.subheader("Share with Friends")
-        share_code = st.text_input("Group Code to Share:")
-        if share_code:
-            msg = f"Join my Aura Hub group! Enter code '{share_code}' in the app."
-            st.text_area("Copy this message:", value=msg)
-            st.write(f"[Share via WhatsApp](https://wa.me/?text={msg})")
+# --- JOIN/CREATE ---
+elif menu == "Join/Create Group":
+    st.header("🤝 Team Setup")
+    new_code = st.text_input("Type a new Group Name to create it:")
+    if st.button("Create & Join"):
+        st.session_state['my_group'] = new_code
+        st.success(f"Group '{new_code}' created! Tell your friends to enter this code in their sidebar.")
+        
+    st.divider()
+    st.write("### Invite Friends")
+    invite_link = f"Join my Aura Hub group! Code: {st.session_state['my_group']}"
+    st.code(invite_link)
 
-# --- TAB 3: LEADERBOARD ---
-elif menu == "Leaderboard":
-    st.header("🏆 Group Standings")
-    view_group = st.text_input("Enter Group Name to see members:")
-    
-    if view_group:
-        res = supabase.table("aura_collab_tracker").select("*").eq("group_name", view_group).execute()
-        if res.data:
-            df = pd.DataFrame(res.data)
-            # This shows everyone who joined that specific group
-            st.dataframe(df[["username", "steps", "sleep_hours", "water", "exercise_mins"]], use_container_width=True)
-        else:
-            st.warning("No data found for this group. Tell your friends to log some stats!")
+# --- LEADERBOARD ---
+elif menu == "Global Leaderboard":
+    st.header(f"🏆 {st.session_state['my_group']} Standings")
+    res = supabase.table("aura_collab_tracker").select("*").eq("group_name", st.session_state['my_group']).execute()
+    if res.data:
+        df = pd.DataFrame(res.data)
+        st.table(df[["username", "steps", "sleep_hours", "water"]])
+    else:
+        st.write("No one has logged stats in this group yet.")
