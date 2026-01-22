@@ -11,7 +11,7 @@ supabase = create_client(URL, KEY)
 
 st.set_page_config(page_title="Aura Elite", layout="wide")
 
-# --- PRO UI (NO CHANGES) ---
+# --- PRO UI ---
 st.markdown("""
 <style>
     .stApp { background-color: #000000; color: #ffffff; font-family: 'Helvetica Neue', sans-serif; }
@@ -57,20 +57,13 @@ with t1:
     c2.markdown(f'<div class="stat-card"><div class="label">Exercise</div><div class="value" style="color:#30d158">{st.session_state.exercise}</div><div class="label">Mins</div></div>', unsafe_allow_html=True)
     c3.markdown(f'<div class="stat-card"><div class="label">Hydration</div><div class="value" style="color:#64d2ff">{st.session_state.water}</div><div class="label">Glasses</div></div>', unsafe_allow_html=True)
 
-    # --- THE HARDWARE SYNC BRIDGE ---
-    if st.button("CONNECT TO APPLE HEALTH / SAMSUNG HEALTH"):
-        # This JS triggers the actual browser 'Motion and Fitness' permission request
-        # On iPhone/Android, this forces the system popup.
+    if st.button("🔄 SYNC APPLE / SAMSUNG HEALTH"):
         st.info("Handshaking with Health Cloud...")
         streamlit_js_eval(js_expressions="""
             DeviceMotionEvent.requestPermission().then(response => {
-                if (response == 'granted') {
-                    window.alert('Hardware Sync Active');
-                }
+                if (response == 'granted') { window.alert('Hardware Sync Active'); }
             }).catch(console.error)
         """, key="hardware_ping")
-        
-        # Save current progress
         p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, 
              "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
         supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
@@ -113,10 +106,27 @@ with t3:
 
 with t4:
     st.title("Networks")
-    new_g = st.text_input("Enter Team Code", placeholder="Type name...")
-    if st.button("SWITCH NETWORK"):
-        st.session_state.active_group = new_g
-        p = {"username": st.session_state.user_name, "group_name": new_g, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
-        supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
-        st.success(f"Network: {new_g}")
-        st.rerun()
+    
+    # --- CREATE GROUP FEATURE ---
+    st.subheader("Create a New Team")
+    create_name = st.text_input("New Group Name", placeholder="e.g. Varsity-2026")
+    if st.button("CREATE & JOIN TEAM"):
+        if create_name:
+            st.session_state.active_group = create_name
+            p = {"username": st.session_state.user_name, "group_name": create_name, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
+            supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
+            st.success(f"Created Group: {create_name}")
+            st.rerun()
+
+    st.write("---")
+
+    # --- JOIN GROUP FEATURE ---
+    st.subheader("Join Existing Team")
+    join_name = st.text_input("Enter Group Code", placeholder="e.g. Global")
+    if st.button("JOIN TEAM"):
+        if join_name:
+            st.session_state.active_group = join_name
+            p = {"username": st.session_state.user_name, "group_name": join_name, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
+            supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
+            st.success(f"Joined Group: {join_name}")
+            st.rerun()
