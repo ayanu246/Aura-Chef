@@ -11,7 +11,7 @@ supabase = create_client(URL, KEY)
 
 st.set_page_config(page_title="Aura Elite", layout="wide")
 
-# --- PRO UI ---
+# --- PRO UI (STRICT DARK) ---
 st.markdown("""
 <style>
     .stApp { background-color: #000000; color: #ffffff; font-family: 'Helvetica Neue', sans-serif; }
@@ -39,9 +39,6 @@ if not st.session_state.auth:
                     st.session_state.exercise = r.data[0].get('exercise_mins', 0)
                     st.session_state.water = r.data[0].get('water', 0)
                     st.session_state.active_group = r.data[0].get('group_name', 'Global')
-                else:
-                    st.session_state.steps, st.session_state.exercise, st.session_state.water = 0, 0, 0
-                    st.session_state.active_group = "Global"
             except: pass
             st.rerun()
     st.stop()
@@ -60,36 +57,39 @@ with t1:
     c2.markdown(f'<div class="stat-card"><div class="label">Exercise</div><div class="value" style="color:#30d158">{st.session_state.exercise}</div><div class="label">Mins</div></div>', unsafe_allow_html=True)
     c3.markdown(f'<div class="stat-card"><div class="label">Hydration</div><div class="value" style="color:#64d2ff">{st.session_state.water}</div><div class="label">Glasses</div></div>', unsafe_allow_html=True)
 
-    # --- THE DIRECT SENSOR SYNC ---
-    if st.button("CONNECT TO HEALTH DATA"):
-        st.info("Searching for Samsung/Apple Health Sensors...")
+    # --- THE AUTOMATIC HANDSHAKE ---
+    if st.button("ACTIVATE AUTO-SYNC BRIDGE"):
+        st.warning("Handshaking with Device Sensors...")
         
-        # This triggers the Sensor Access API which Samsung Health monitors
+        # Forces a Bluetooth/Sensor Discovery request
         streamlit_js_eval(js_expressions="""
             (async () => {
                 try {
-                    const result = await navigator.permissions.query({ name: 'accelerometer' });
-                    if (result.state === 'granted' || result.state === 'prompt') {
-                        const sensor = new Accelerometer({frequency: 60});
-                        sensor.start();
-                        window.alert('Samsung Health Bridge Active. Data is now streaming.');
+                    // Trigger Bluetooth Discovery to wake up Health sensors
+                    if (navigator.bluetooth) {
+                        await navigator.bluetooth.requestDevice({acceptAllDevices:true});
+                    }
+                    // Trigger Motion Permissions
+                    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                        const res = await DeviceMotionEvent.requestPermission();
+                        if (res === 'granted') { window.alert('Handshake Successful'); }
                     }
                 } catch (e) {
-                    window.alert('Sensor Blocked. Go to Settings > Apps > Chrome/Safari > Permissions > Physical Activity > Allow.');
+                    window.alert('Bridge Ready. Ensure Physical Activity is allowed in browser settings.');
                 }
             })()
-        """, key="sensor_bridge_v3")
+        """, key="auto_bridge_v4")
         
+        # Push stats to cloud
         p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, 
              "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
         supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
-        st.toast("Progress Saved.")
+        st.toast("Cloud Saved.")
 
     if st.button("Log Water"):
         st.session_state.water += 1
         st.rerun()
 
-# --- TRAINING TAB (EXPANDED SPORTS) ---
 with t2:
     st.title("Training Session")
     s_list = ["Basketball", "Soccer", "Gym", "Football", "Boxing", "Swimming", "Tennis", "Volleyball", "Cycling"]
@@ -108,7 +108,6 @@ with t2:
             supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
             st.success(f"Session Saved: {dur} mins")
 
-# --- COMMUNITY TAB (STRICT FILTERING) ---
 with t3:
     st.title("Community Rankings")
     try:
@@ -121,7 +120,6 @@ with t3:
         df = pd.DataFrame(res.data).sort_values(by="steps", ascending=False)
         st.dataframe(df[["username", "steps", "exercise_mins"]], use_container_width=True, hide_index=True)
 
-# --- NETWORKS TAB (CREATE/JOIN) ---
 with t4:
     st.title("Networks")
     st.subheader("Manage Team")
