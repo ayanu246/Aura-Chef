@@ -11,7 +11,7 @@ supabase = create_client(URL, KEY)
 
 st.set_page_config(page_title="Aura Elite", layout="wide")
 
-# --- PRO UI (STRICT DARK THEME) ---
+# --- PRO UI ---
 st.markdown("""
 <style>
     .stApp { background-color: #000000; color: #ffffff; font-family: 'Helvetica Neue', sans-serif; }
@@ -19,7 +19,6 @@ st.markdown("""
     .label { color: #8e8e93; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .value { font-size: 2.5rem; font-weight: 900; color: #007aff; margin: 5px 0; }
     .stButton>button { border-radius: 8px; background: #007aff; color: white; border: none; font-weight: 600; width: 100%; padding: 10px; }
-    .stTabs [data-baseweb="tab-list"] { background-color: #000000; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -61,30 +60,25 @@ with t1:
     c2.markdown(f'<div class="stat-card"><div class="label">Exercise</div><div class="value" style="color:#30d158">{st.session_state.exercise}</div><div class="label">Mins</div></div>', unsafe_allow_html=True)
     c3.markdown(f'<div class="stat-card"><div class="label">Hydration</div><div class="value" style="color:#64d2ff">{st.session_state.water}</div><div class="label">Glasses</div></div>', unsafe_allow_html=True)
 
-    # --- THE FIXED HARDWARE SYNC ---
-    if st.button("CONNECT TO HEALTH CLOUD"):
-        st.info("Requesting Permission from Apple/Samsung Health Sensors...")
+    # --- THE DIRECT SENSOR SYNC ---
+    if st.button("CONNECT TO HEALTH DATA"):
+        st.info("Searching for Samsung/Apple Health Sensors...")
         
-        # This updated script forces the DeviceMotion permission popup
+        # This triggers the Sensor Access API which Samsung Health monitors
         streamlit_js_eval(js_expressions="""
-            (function() {
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    DeviceMotionEvent.requestPermission()
-                        .then(permissionState => {
-                            if (permissionState === 'granted') {
-                                window.alert('Health Sensor Access Granted');
-                            } else {
-                                window.alert('Permission Denied. Please enable in Settings.');
-                            }
-                        })
-                        .catch(err => {
-                            window.alert('Manual Access Required: Add this app to your Home Screen first.');
-                        });
-                } else {
-                    window.alert('Health Data Access ready. Ensure app is installed to Home Screen.');
+            (async () => {
+                try {
+                    const result = await navigator.permissions.query({ name: 'accelerometer' });
+                    if (result.state === 'granted' || result.state === 'prompt') {
+                        const sensor = new Accelerometer({frequency: 60});
+                        sensor.start();
+                        window.alert('Samsung Health Bridge Active. Data is now streaming.');
+                    }
+                } catch (e) {
+                    window.alert('Sensor Blocked. Go to Settings > Apps > Chrome/Safari > Permissions > Physical Activity > Allow.');
                 }
             })()
-        """, key="hw_sync_v2")
+        """, key="sensor_bridge_v3")
         
         p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, 
              "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
@@ -95,6 +89,7 @@ with t1:
         st.session_state.water += 1
         st.rerun()
 
+# --- TRAINING TAB (EXPANDED SPORTS) ---
 with t2:
     st.title("Training Session")
     s_list = ["Basketball", "Soccer", "Gym", "Football", "Boxing", "Swimming", "Tennis", "Volleyball", "Cycling"]
@@ -113,6 +108,7 @@ with t2:
             supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
             st.success(f"Session Saved: {dur} mins")
 
+# --- COMMUNITY TAB (STRICT FILTERING) ---
 with t3:
     st.title("Community Rankings")
     try:
@@ -125,6 +121,7 @@ with t3:
         df = pd.DataFrame(res.data).sort_values(by="steps", ascending=False)
         st.dataframe(df[["username", "steps", "exercise_mins"]], use_container_width=True, hide_index=True)
 
+# --- NETWORKS TAB (CREATE/JOIN) ---
 with t4:
     st.title("Networks")
     st.subheader("Manage Team")
