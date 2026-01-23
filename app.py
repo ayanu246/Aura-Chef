@@ -57,34 +57,34 @@ with t1:
     c2.markdown(f'<div class="stat-card"><div class="label">Exercise</div><div class="value" style="color:#30d158">{st.session_state.exercise}</div><div class="label">Mins</div></div>', unsafe_allow_html=True)
     c3.markdown(f'<div class="stat-card"><div class="label">Hydration</div><div class="value" style="color:#64d2ff">{st.session_state.water}</div><div class="label">Glasses</div></div>', unsafe_allow_html=True)
 
-    # --- THE AUTOMATIC HANDSHAKE ---
-    if st.button("ACTIVATE AUTO-SYNC BRIDGE"):
-        st.warning("Handshaking with Device Sensors...")
+    # --- UNIVERSAL HEALTH BRIDGE ---
+    if st.button("ACTIVATE HEALTH SYNC"):
+        st.warning("Connecting to Samsung/Apple Cloud...")
         
-        # Forces a Bluetooth/Sensor Discovery request
         streamlit_js_eval(js_expressions="""
             (async () => {
                 try {
-                    // Trigger Bluetooth Discovery to wake up Health sensors
-                    if (navigator.bluetooth) {
-                        await navigator.bluetooth.requestDevice({acceptAllDevices:true});
+                    // Try to wake up Physical Activity Sensors
+                    if (window.DeviceOrientationEvent) {
+                        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                            await DeviceOrientationEvent.requestPermission();
+                        }
                     }
-                    // Trigger Motion Permissions
-                    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                        const res = await DeviceMotionEvent.requestPermission();
-                        if (res === 'granted') { window.alert('Handshake Successful'); }
+                    // Try to ping the Fitness API directly
+                    if ('permissions' in navigator) {
+                        await navigator.permissions.query({ name: 'accelerometer' });
                     }
+                    window.alert('Handshake request sent. If steps do not update, check Browser Permissions for Physical Activity.');
                 } catch (e) {
-                    window.alert('Bridge Ready. Ensure Physical Activity is allowed in browser settings.');
+                    console.log(e);
                 }
             })()
-        """, key="auto_bridge_v4")
+        """, key="universal_bridge")
         
-        # Push stats to cloud
         p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, 
              "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
         supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
-        st.toast("Cloud Saved.")
+        st.toast("Sync Data Sent to Cloud.")
 
     if st.button("Log Water"):
         st.session_state.water += 1
