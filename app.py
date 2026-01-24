@@ -23,9 +23,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 4. AUTHENTICATION (WITH CRASH PROTECTION) ---
-if 'auth' not in st.session_state: 
-    st.session_state.auth = False
+# --- 4. AUTHENTICATION ---
+if 'auth' not in st.session_state: st.session_state.auth = False
 
 if not st.session_state.auth:
     st.title("Aura Elite Athlete Login")
@@ -34,53 +33,7 @@ if not st.session_state.auth:
         if u_in:
             st.session_state.user_name = u_in
             st.session_state.auth = True
-            # Set absolute defaults first to prevent black screen
-            st.session_state.steps = 0
-            st.session_state.exercise = 0
-            st.session_state.water = 0
+            st.session_state.steps, st.session_state.exercise, st.session_state.water = 0, 0, 0
             st.session_state.active_group = "Global"
-            
             try:
-                r = supabase.table("aura_collab_tracker").select("*").eq("username", u_in).execute()
-                if r.data:
-                    st.session_state.steps = r.data[0].get('steps', 0)
-                    st.session_state.exercise = r.data[0].get('exercise_mins', 0)
-                    st.session_state.water = r.data[0].get('water', 0)
-                    st.session_state.active_group = r.data[0].get('group_name', 'Global')
-            except Exception as e:
-                pass # Defaults are already set, so app will still load
-            st.rerun()
-    st.stop()
-
-# --- 5. RE-VERIFY STATE EXISTS ---
-for k, v in {"steps": 0, "water": 0, "exercise": 0, "active_group": "Global"}.items():
-    if k not in st.session_state: st.session_state[k] = v
-
-# --- 6. MAIN NAVIGATION TABS ---
-t1, t2, t3, t4 = st.tabs(["DASHBOARD", "TRAINING", "COMMUNITY", "NETWORKS"])
-
-with t1:
-    st.markdown(f"### Athlete: {st.session_state.user_name}")
-    c1, c2, c3 = st.columns(3)
-    c1.markdown(f'<div class="stat-card"><div class="label">Move</div><div class="value">{st.session_state.steps}</div><div class="label">Steps</div></div>', unsafe_allow_html=True)
-    c2.markdown(f'<div class="stat-card"><div class="label">Exercise</div><div class="value" style="color:#30d158">{st.session_state.exercise}</div><div class="label">Mins</div></div>', unsafe_allow_html=True)
-    c3.markdown(f'<div class="stat-card"><div class="label">Hydration</div><div class="value" style="color:#64d2ff">{st.session_state.water}</div><div class="label">Glasses</div></div>', unsafe_allow_html=True)
-
-    if st.button("ACTIVATE CHROME HEALTH BRIDGE"):
-        st.warning("Pinging System Health Sensors...")
-        streamlit_js_eval(js_expressions="""
-            (async () => {
-                try {
-                    if ('Accelerometer' in window) {
-                        const acc = new Accelerometer({frequency: 10});
-                        acc.start();
-                        window.alert('Handshake Sent.');
-                    } else {
-                        window.alert('Check Chrome Settings > Site Settings > Motion Sensors.');
-                    }
-                } catch (e) { console.log(e); }
-            })()
-        """, key="chrome_sync_final")
-        
-        p = {
-            "username
+                r = supabase.table("aura_collab_tracker").select
