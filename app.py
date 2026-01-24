@@ -56,12 +56,52 @@ with t1:
 
     if st.button("ACTIVATE HEALTH BRIDGE"):
         st.warning("Pinging System Health Sensors...")
-        streamlit_js_eval(js_expressions="""
-            (async () => {
-                try {
-                    if ('Accelerometer' in window) {
-                        const acc = new Accelerometer({frequency: 10});
-                        acc.start();
-                        window.alert('Bridge Active');
-                    } else { window.alert('Check Site Settings > Motion Sensors'); }
-                } catch (
+        # --- FIXED JS BLOCK ---
+        streamlit_js_eval(js_expressions="""(async () => { try { if ('Accelerometer' in window) { const acc = new Accelerometer({frequency: 10}); acc.start(); window.alert('Bridge Active'); } else { window.alert('Enable Motion Sensors in Chrome Settings'); } } catch (e) { console.log(e); } })()""", key="chrome_sync_final")
+        
+        p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
+        try: supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
+        except Exception: pass
+
+    if st.button("Log Water"):
+        st.session_state.water += 1
+        st.rerun()
+
+with t2:
+    st.title("Training Session")
+    s_list = ["Basketball", "Soccer", "Gym", "Boxing", "Swimming", "Tennis"]
+    sport = st.selectbox("Select Activity", s_list)
+    if 't_start' not in st.session_state: st.session_state.t_start = None
+    if st.button("START"): st.session_state.t_start = time.time()
+    if st.button("STOP & SAVE"):
+        if st.session_state.t_start:
+            dur = int((time.time() - st.session_state.t_start) / 60)
+            st.session_state.exercise += dur
+            st.session_state.t_start = None
+            p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
+            try: supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
+            except Exception: pass
+            st.rerun()
+
+with t3:
+    st.title("Community Rankings")
+    try:
+        all_g_res = supabase.table("aura_collab_tracker").select("group_name").execute()
+        g_list = sorted(list(set([x['group_name'] for x in all_g_res.data])))
+    except Exception: g_list = [st.session_state.active_group]
+    view_g = st.selectbox("Leaderboard View", g_list, index=g_list.index(st.session_state.active_group) if st.session_state.active_group in g_list else 0)
+    res = supabase.table("aura_collab_tracker").select("*").eq("group_name", view_g).execute()
+    if res.data:
+        df = pd.DataFrame(res.data).sort_values(by="steps", ascending=False)
+        st.dataframe(df[["username", "steps", "exercise_mins"]], use_container_width=True, hide_index=True)
+
+with t4:
+    st.title("Networks")
+    new_g = st.text_input("New or Existing Group Name")
+    if st.button("LOCK IN TEAM"):
+        if new_g:
+            st.session_state.active_group = new_g
+            p = {"username": st.session_state.user_name, "group_name": new_g, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
+            try: supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
+            except Exception: pass
+            st.rerun()
