@@ -4,15 +4,13 @@ import pandas as pd
 from streamlit_js_eval import streamlit_js_eval
 import time
 
-# --- 1. DB CONNECTION ---
+# --- 1. CONNECTION ---
 URL = "https://uetvrqirjmbgodcbsruh.supabase.co"
 KEY = "sb_publishable_6lw0WScY9K1LJ4Itwmw4Eg_07kYJdlC"
 supabase = create_client(URL, KEY)
 
-# --- 2. PAGE CONFIG ---
+# --- 2. CONFIG & UI ---
 st.set_page_config(page_title="Aura Elite", layout="wide")
-
-# --- 3. PRO UI STYLING ---
 st.markdown("""
 <style>
     .stApp { background-color: #000000; color: #ffffff; font-family: 'Helvetica Neue', sans-serif; }
@@ -23,7 +21,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 4. AUTHENTICATION ---
+# --- 3. AUTHENTICATION ---
 if 'auth' not in st.session_state: st.session_state.auth = False
 
 if not st.session_state.auth:
@@ -36,4 +34,34 @@ if not st.session_state.auth:
             st.session_state.steps, st.session_state.exercise, st.session_state.water = 0, 0, 0
             st.session_state.active_group = "Global"
             try:
-                r = supabase.table("aura_collab_tracker").select
+                r = supabase.table("aura_collab_tracker").select("*").eq("username", u_in).execute()
+                if r.data:
+                    st.session_state.steps = r.data[0].get('steps', 0)
+                    st.session_state.exercise = r.data[0].get('exercise_mins', 0)
+                    st.session_state.water = r.data[0].get('water', 0)
+                    st.session_state.active_group = r.data[0].get('group_name', 'Global')
+            except Exception: pass
+            st.rerun()
+    st.stop()
+
+# --- 4. TABS ---
+t1, t2, t3, t4 = st.tabs(["DASHBOARD", "TRAINING", "COMMUNITY", "NETWORKS"])
+
+with t1:
+    st.markdown(f"### Athlete: {st.session_state.user_name}")
+    c1, c2, c3 = st.columns(3)
+    c1.markdown(f'<div class="stat-card"><div class="label">Move</div><div class="value">{st.session_state.steps}</div><div class="label">Steps</div></div>', unsafe_allow_html=True)
+    c2.markdown(f'<div class="stat-card"><div class="label">Exercise</div><div class="value" style="color:#30d158">{st.session_state.exercise}</div><div class="label">Mins</div></div>', unsafe_allow_html=True)
+    c3.markdown(f'<div class="stat-card"><div class="label">Hydration</div><div class="value" style="color:#64d2ff">{st.session_state.water}</div><div class="label">Glasses</div></div>', unsafe_allow_html=True)
+
+    if st.button("ACTIVATE HEALTH BRIDGE"):
+        st.warning("Pinging System Health Sensors...")
+        streamlit_js_eval(js_expressions="""
+            (async () => {
+                try {
+                    if ('Accelerometer' in window) {
+                        const acc = new Accelerometer({frequency: 10});
+                        acc.start();
+                        window.alert('Bridge Active');
+                    } else { window.alert('Check Site Settings > Motion Sensors'); }
+                } catch (
