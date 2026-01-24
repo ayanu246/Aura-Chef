@@ -57,56 +57,49 @@ with t1:
     c2.markdown(f'<div class="stat-card"><div class="label">Exercise</div><div class="value" style="color:#30d158">{st.session_state.exercise}</div><div class="label">Mins</div></div>', unsafe_allow_html=True)
     c3.markdown(f'<div class="stat-card"><div class="label">Hydration</div><div class="value" style="color:#64d2ff">{st.session_state.water}</div><div class="label">Glasses</div></div>', unsafe_allow_html=True)
 
-    # --- UNIVERSAL HEALTH BRIDGE ---
-    if st.button("ACTIVATE HEALTH SYNC"):
-        st.warning("Connecting to Samsung/Apple Cloud...")
+    # --- CHROME HARDWARE FORCE ---
+    if st.button("ACTIVATE CHROME HEALTH BRIDGE"):
+        st.warning("Requesting System Pedometer Access...")
         
         streamlit_js_eval(js_expressions="""
             (async () => {
                 try {
-                    // Try to wake up Physical Activity Sensors
-                    if (window.DeviceOrientationEvent) {
-                        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                            await DeviceOrientationEvent.requestPermission();
-                        }
+                    // Force Chrome to ask for Physical Activity permission
+                    const status = await navigator.permissions.query({ name: 'accelerometer' });
+                    if (status.state === 'prompt') {
+                        const acc = new Accelerometer({frequency: 10});
+                        acc.start();
                     }
-                    // Try to ping the Fitness API directly
-                    if ('permissions' in navigator) {
-                        await navigator.permissions.query({ name: 'accelerometer' });
-                    }
-                    window.alert('Handshake request sent. If steps do not update, check Browser Permissions for Physical Activity.');
+                    window.alert('Chrome Bridge Active. If no popup appeared, go to Settings > Apps > Chrome > Permissions.');
                 } catch (e) {
-                    console.log(e);
+                    window.alert('Chrome Security Block: Please check Chrome Settings > Site Settings > Motion Sensors.');
                 }
             })()
-        """, key="universal_bridge")
+        """, key="chrome_sync")
         
         p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, 
              "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
         supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
-        st.toast("Sync Data Sent to Cloud.")
 
     if st.button("Log Water"):
         st.session_state.water += 1
         st.rerun()
 
+# --- OTHER TABS (STAY THE SAME) ---
 with t2:
     st.title("Training Session")
     s_list = ["Basketball", "Soccer", "Gym", "Football", "Boxing", "Swimming", "Tennis", "Volleyball", "Cycling"]
     sport = st.selectbox("Select Activity", s_list)
     if 't_start' not in st.session_state: st.session_state.t_start = None
-    c_st, c_sp = st.columns(2)
-    if c_st.button("START"):
-        st.session_state.t_start = time.time()
-        st.info(f"Recording {sport}...")
-    if c_sp.button("STOP & SAVE"):
+    if st.button("START"): st.session_state.t_start = time.time()
+    if st.button("STOP & SAVE"):
         if st.session_state.t_start:
             dur = int((time.time() - st.session_state.t_start) / 60)
             st.session_state.exercise += dur
             st.session_state.t_start = None
             p = {"username": st.session_state.user_name, "group_name": st.session_state.active_group, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
             supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
-            st.success(f"Session Saved: {dur} mins")
+            st.rerun()
 
 with t3:
     st.title("Community Rankings")
@@ -122,12 +115,10 @@ with t3:
 
 with t4:
     st.title("Networks")
-    st.subheader("Manage Team")
-    new_g = st.text_input("New or Existing Group Name", placeholder="e.g. Ora")
+    new_g = st.text_input("New or Existing Group Name")
     if st.button("LOCK IN TEAM"):
         if new_g:
             st.session_state.active_group = new_g
             p = {"username": st.session_state.user_name, "group_name": new_g, "steps": st.session_state.steps, "exercise_mins": st.session_state.exercise, "water": st.session_state.water}
             supabase.table("aura_collab_tracker").upsert(p, on_conflict="username,group_name").execute()
-            st.success(f"Network Locked: {new_g}")
             st.rerun()
