@@ -1,10 +1,10 @@
 import streamlit as st
 import time
 
-# --- AURA CHEF AI v15.0 ---
-st.set_page_config(page_title="AURA CHEF | AI ELITE", page_icon="⚖️", layout="wide")
+# --- AURA CHEF AI v16.0 ---
+st.set_page_config(page_title="AURA CHEF | AI VISUALIZER", page_icon="⚖️", layout="wide")
 
-# --- UI STYLING ---
+# --- UI STYLING: THE BLACK ROOM ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -17,88 +17,87 @@ st.markdown("""
     .high { background: #471111; color: #ff4b4b; }
     .med { background: #473211; color: #ffa500; }
     .low { background: #112247; color: #4b96ff; }
-    .ai-frame { border: 1px solid #34d399; padding: 20px; text-align: center; background: #000; margin-bottom: 20px; }
+    .ai-visual-box { border: 2px solid #34d399; padding: 20px; text-align: center; background: #000; margin-bottom: 25px; position: relative; }
 </style>
 """, unsafe_allow_html=True)
 
-t1, t2 = st.tabs(["AI SIGNATURE SELECTION", "GLOBAL PANTRY ENGINE"])
+t1, t2 = st.tabs(["AI SIGNATURE SELECTION", "GLOBAL HERITAGE ENGINE"])
 
-# --- TAB 1: SIGNATURE ---
+# --- TAB 1: THE MANDI BIRYANI MASTERCLASS ---
 with t1:
     st.markdown("<h1 style='text-align: center; font-weight: 900; margin-top:40px;'>AURA AI SIGNATURE</h1>", unsafe_allow_html=True)
     c1, mid, c2 = st.columns([1,2,1])
     with mid:
         st.markdown("""
         <div class="recipe-card">
-            <h2 style="text-align:center;">Lamb Mandi & Biryani Fusion</h2>
-            <div class="ai-frame">
-                <h4 style="color:#34d399;">AI VISUAL GENERATION ACTIVE</h4>
-                <p style="font-size:0.8rem; color:#666;">PROCESSING KINETIC CULINARY DATA...</p>
-                <div style="height:300px; display:flex; align-items:center; justify-content:center; border:1px dashed #333;">
-                    <p>AI VIDEO STREAM INITIALIZED: [CINEMATIC_MANDI_RENDER_V4]</p>
+            <h2 style="text-align:center; letter-spacing:-1px;">Lamb Mandi & Biryani Fusion</h2>
+            <div class="ai-visual-box">
+                <p style="color:#34d399; font-size:0.75rem; letter-spacing:2px; margin-bottom:10px;">AI VIDEO KINETIC RENDER ACTIVE</p>
+                <div style="border:1px dashed #333; height:250px; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:#444;">[AI CINEMATIC VISUALIZATION: SMOKED LAMB OVER SAFFRON GRAIN]</span>
                 </div>
             </div>
-            <p style="color:#888; text-align:center;">This dish uses the Yemeni smoke-pit technique combined with 72-hour aged Basmati rice.</p>
+            <p style="color:#888; text-align:center; font-size:0.9rem;">The AI has fused the Yemeni 'Hawayij' spice profile with the 'Dum' layering of Indo-Pak heritage.</p>
         </div>
         """, unsafe_allow_html=True)
 
-# --- TAB 2: THE 15-STEP ENGINE ---
+# --- TAB 2: GLOBAL HERITAGE ENGINE (15 STEPS) ---
 with t2:
     st.markdown("### GLOBAL HERITAGE ENGINE")
-    dish_input = st.text_input("INPUT PANTRY ITEMS", placeholder="e.g. Chicken, Beef, Lamb, Potato...")
+    dish = st.text_input("INPUT MAIN INGREDIENT", placeholder="e.g. Chicken, Lamb, Prawns...")
     
-    if dish_input:
-        heritage = st.selectbox("SELECT HERITAGE", ["Pakistani", "Indian", "Arab/Egyptian", "Asian", "Mexican", "American"])
+    if dish:
+        heritage = st.selectbox("CHOOSE HERITAGE STYLE", 
+                                ["Pakistani", "Arab/Egyptian", "Indian", "Asian", "Mexican", "American"])
         
-        # MASSIVE 15-STEP DATABASE
+        # MASSIVE CULINARY LOGIC DATABASE
         db = {
             "Pakistani": [
-                "<b>Mise En Place:</b> Peel and thin-slice 3 onions; crush 3 inches of ginger and 10 garlic cloves.",
-                "<b>Fat Activation:</b> Heat 1/2 cup oil on <span class='heat-tag high'>HIGH</span> until it shimmers.",
-                "<b>The Browning:</b> Sauté onions for 12-15 mins. They must be uniform chocolate brown.",
-                "<b>Aromatic Bloom:</b> Add ginger-garlic paste. Stir for 90 seconds until the raw smell vanishes.",
-                "<b>Spice Hydration:</b> Mix Garam Masala, Chili, and Turmeric with water to prevent scorching.",
-                "<b>The Maillard Reaction:</b> Add " + dish_input + ". Increase heat to max and sear until deep brown.",
-                "<b>Acidity Layer:</b> Add 2 chopped tomatoes. Cook until they dissolve into a thick jam.",
-                "<b>The Bhuna:</b> Continue stirring on high heat until the oil separates completely from the masala.",
-                "<b>Dairy Tempering:</b> Reduce to <span class='heat-tag med'>MEDIUM</span>. Add whisked yogurt one spoonful at a time.",
-                "<b>Pressure/Cover:</b> Add 1 cup hot water. Cover with a heavy, weighted lid.",
-                "<b>Slow Braise:</b> Reduce heat to <span class='heat-tag low'>LOW</span>. Simmer for 35 minutes.",
-                "<b>The Scent:</b> Add 4 slit green chilies and a palmful of dried fenugreek leaves (Kasuri Methi).",
-                "<b>Garnish:</b> Use 1 cup of fresh cilantro and 1/2 cup of julienned ginger.",
-                "<b>Resting Phase:</b> Turn off heat. Keep lid sealed for 10 mins to allow juices to redistribute.",
-                "<b>Service:</b> Serve on a heated platter with Roghni Naan or Basmati rice."
+                "<b>Mise En Place:</b> Peel and thin-slice 4 large red onions; crush 3 inches of ginger and 12 cloves of garlic.",
+                "<b>Fat Activation:</b> Heat 150ml of high-smoke point oil on <span class='heat-tag high'>HIGH</span> heat.",
+                "<b>The Browning (Barista):</b> Sauté onions for 15 mins. They must be deep chocolate brown but not bitter.",
+                "<b>Aromatic Bloom:</b> Add ginger-garlic paste. Stir for 120 seconds until the 'raw' aroma is gone.",
+                "<b>Spice Hydration:</b> Mix 2 tbsp Garam Masala and 1 tbsp Kashmiri Chili with water; add to the pot.",
+                "<b>The Maillard Reaction:</b> Add " + dish + ". Sear at max heat for 8 mins to lock in every drop of juice.",
+                "<b>Acidity Layer:</b> Add 3 finely chopped vine tomatoes. Cook until they dissolve into a rich, thick jam.",
+                "<b>The Bhuna:</b> High-intensity stirring until the oil 'breaks' and separates from the spice base.",
+                "<b>Dairy Tempering:</b> Reduce to <span class='heat-tag med'>MEDIUM</span>. Fold in 1 cup of whisked yogurt slowly.",
+                "<b>The Liquid Ratio:</b> Add 1.5 cups of boiling water. Never add cold water to hot protein.",
+                "<b>The Cover:</b> Seal the pot with a heavy lid and a weight. Reduce heat to <span class='heat-tag low'>LOW</span>.",
+                "<b>Braising:</b> Allow 35-45 minutes for the protein fibers to break down into a 'melt-in-mouth' state.",
+                "<b>The Scent:</b> Add 5 slit Thai green chilies and a handful of dried fenugreek leaves (Kasuri Methi).",
+                "<b>Resting:</b> Turn off the heat. Keep the lid sealed for 12 mins to let the steam settle.",
+                "<b>Service:</b> Garnish with fresh ginger matchsticks and cilantro. Serve with aged Basmati rice."
             ],
-            "Indian": [
-                "<b>Whole Spice Tempering:</b> Heat ghee on <span class='heat-tag high'>HIGH</span>. Add cardamom, cinnamon, and cloves.",
-                "<b>Onion Base:</b> Sauté onions until translucent and soft, not crispy.",
-                "<b>Ginger-Garlic Infusion:</b> Add fresh paste and sauté until golden.",
-                "<b>Tomato-Cashew Base:</b> Add tomato puree and cashew paste for a silky restaurant texture.",
-                "<b>Spice Layering:</b> Add Kashmiri Mirch, Kadhai Masala, and Turmeric.",
-                "<b>Protein Searing:</b> Add " + dish_input + ". Coat thoroughly in the thick gravy.",
-                "<b>Moisture Control:</b> Add warm water only; cold water will shock the proteins.",
-                "<b>The Simmer:</b> Cover and cook on <span class='heat-tag med'>MEDIUM-LOW</span> for 20 minutes.",
-                "<b>Creaming:</b> Pour in heavy cream in a slow stream while stirring.",
-                "<b>Butter Finish:</b> Add cold butter cubes to create a glossy 'Makhani' finish.",
-                "<b>Herbal Touch:</b> Rub Kasuri Methi between hands and sprinkle for aroma.",
-                "<b>Saffron Drop:</b> Add saffron-infused milk for the Royal Indian profile.",
-                "<b>Smoking:</b> Place a hot coal in the center for a smoky Tandoor effect.",
-                "<b>Garnish:</b> Top with fresh cream swirls and cilantro.",
-                "<b>Service:</b> Pair with Garlic Naan or Jeera Rice."
+            "Arab/Egyptian": [
+                "<b>Fat Initiation:</b> Melt 4 tbsp of pure sheep ghee in a heavy cast iron pot on <span class='heat-tag med'>MEDIUM</span>.",
+                "<b>Aromatic Start:</b> Sauté onions with 2 whole 'Loomi' (dried limes). Pierce the limes first.",
+                "<b>Heritage Toasting:</b> Add 2 cinnamon sticks, 5 green cardamom pods, and a pinch of whole cloves.",
+                "<b>Baharat Bloom:</b> Stir in the Arab 7-Spice mix (Baharat) and a dusting of Sumac for 60 seconds.",
+                "<b>The Sear:</b> Add your " + dish + ". Fry until the edges are golden-yellow from the spice oil.",
+                "<b>Stock Production:</b> Add 4 cups of boiling water and salt. Simmer on <span class='heat-tag low'>LOW</span> until tender.",
+                "<b>Rice Prep:</b> Wash long-grain Basmati 5 times until the water runs clear. Soak for 30 minutes.",
+                "<b>The Union:</b> Add the soaked rice to the simmering meat broth. The water must be 1 inch above.",
+                "<b>Boil Phase:</b> Crank heat to <span class='heat-tag high'>HIGH</span> until the water evaporates and 'holes' form.",
+                "<b>The Smoke:</b> Light a natural wood coal. Place in a foil cup with oil inside the pot. Close tightly.",
+                "<b>Steaming:</b> Reduce to the absolute lowest heat for 20 minutes.",
+                "<b>Nut Prep:</b> Fry almonds and pine nuts in butter until golden. Set aside.",
+                "<b>The Reveal:</b> Open the lid. The aroma should be intensely smoky and citrusy.",
+                "<b>Assembly:</b> Place the rice on a massive communal tray, meat on top, nuts showered over.",
+                "<b>Service:</b> Serve with a side of 'Salata Hara' (spicy tomato and parsley dip)."
             ]
-            # ... and so on for all heritages
         }
         
+        # Final Step Generation
         steps = db.get(heritage, db["Pakistani"])
 
         st.markdown(f"""
         <div class="recipe-card">
-            <h2 style="color:#34d399; text-align:center;">AI CULINARY BLUEPRINT: {heritage.upper()} {dish_input.upper()}</h2>
-            <hr style="border:0.1px solid #333">
-            <div class="ai-frame">
-                <p style="color:#34d399; font-size:0.75rem;">AI VIDEO GENERATION FOR {heritage.upper()} TECHNIQUE...</p>
-                <div style="height:150px; border:1px dashed #222; display:flex; align-items:center; justify-content:center;">
-                    [AI VIDEO STREAM: {heritage.upper()}_KITCHEN_PROCESS]
+            <h2 style="color:#34d399; text-align:center;">{heritage.upper()} {dish.upper()} BLUEPRINT</h2>
+            <div class="ai-visual-box">
+                <p style="color:#34d399; font-size:0.7rem; letter-spacing:2px;">AI TECHNIQUE VISUALIZER: {heritage.upper()}</p>
+                <div style="height:120px; border:1px dashed #222; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:#444;">[GENERATING {heritage.upper()} CULINARY PROCESS...]</span>
                 </div>
             </div>
             {"".join([f"<p><span class='step-num'>{i+1:02}</span> {s}</p>" for i, s in enumerate(steps)])}
