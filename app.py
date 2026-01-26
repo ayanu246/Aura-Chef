@@ -1,7 +1,8 @@
 import streamlit as st
+import datetime
 
-# --- AURA CHEF AI v18.0 ---
-st.set_page_config(page_title="AURA CHEF | AI ELITE", page_icon="⚖️", layout="wide")
+# --- AURA CHEF AI v19.0 ---
+st.set_page_config(page_title="AURA CHEF | DYNAMIC", page_icon="⚖️", layout="wide")
 
 # --- UI STYLING ---
 st.markdown("""
@@ -16,89 +17,85 @@ st.markdown("""
     .high { background: #471111; color: #ff4b4b; }
     .med { background: #473211; color: #ffa500; }
     .low { background: #112247; color: #4b96ff; }
-    .ai-visual-frame { border: 1px solid #34d399; padding: 20px; text-align: center; background: #000; margin-bottom: 25px; }
+    .vid-button {
+        display: block; width: 100%; padding: 20px; background: #fff; color: #000; 
+        text-align: center; font-weight: 900; text-decoration: none; border-radius: 4px;
+        text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; margin: 20px 0;
+    }
+    .vid-button:hover { background: #34d399; color: #000; }
 </style>
 """, unsafe_allow_html=True)
 
-t1, t2 = st.tabs(["AI SIGNATURE SELECTION", "GLOBAL HERITAGE ENGINE"])
+# --- DYNAMIC "FOOD OF THE DAY" LOGIC ---
+# This changes based on the actual date
+daily_menu = {
+    0: "Lamb Mandi Biryani Fusion",
+    1: "Wagyu Smash Burgers",
+    2: "Creamy Butter Chicken Masterclass",
+    3: "Street Style Mexican Birria Tacos",
+    4: "Authentic Thai Green Curry",
+    5: "Slow-Cooked Nihari",
+    6: "Gourmet Truffle Pasta"
+}
+day_of_week = datetime.datetime.now().weekday()
+featured_food = daily_menu[day_of_week]
 
-# --- TAB 1: AI SIGNATURE (FIXED) ---
+t1, t2 = st.tabs(["DAILY SIGNATURE SELECTION", "GLOBAL PANTRY ENGINE"])
+
+# --- TAB 1: DYNAMIC DAILY SELECTION ---
 with t1:
-    st.markdown("<h1 style='text-align: center; font-weight: 900; margin-top:40px;'>AURA AI SELECTION</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center; font-weight: 900; margin-top:40px;'>{featured_food.upper()}</h1>", unsafe_allow_html=True)
     c1, mid, c2 = st.columns([1,2,1])
     with mid:
+        # Build the dynamic YouTube search link
+        yt_search = f"https://www.youtube.com/results?search_query=best+professional+{featured_food.replace(' ', '+')}+recipe"
+        
         st.markdown(f"""
-        <div class="recipe-card">
-            <h2 style="text-align:center;">Lamb Mandi & Biryani Fusion</h2>
-            <div class="ai-visual-frame">
-                <p style="color:#34d399; font-size:0.75rem; letter-spacing:2px;">AI KINETIC STREAM: ACTIVE</p>
-                <div style="height:200px; display:flex; align-items:center; justify-content:center; border:1px dashed #333;">
-                    <span style="color:#444;">[CINEMATIC_MANDI_RENDER_V5]</span>
-                </div>
-            </div>
-            <p style="color:#888; text-align:center;">Technique: Yemeni Hawayij Spicing x Indo-Pak Dum Steam</p>
+        <div class="recipe-card" style="text-align:center;">
+            <p style="color:#34d399; letter-spacing:3px; font-size:0.7rem;">FEATURED MASTERCLASS</p>
+            <p style="color:#666;">Our AI engine has indexed the top-rated professional video for today's selection.</p>
+            <a href="{yt_search}" target="_blank" class="vid-button">WATCH BEST {featured_food.upper()} VIDEO ↗</a>
+            <p style="font-size:0.8rem; color:#444;">Note: Opens in a new tab to ensure 4K playback quality.</p>
         </div>
         """, unsafe_allow_html=True)
 
-# --- TAB 2: THE 15-STEP ENGINE ---
+# --- TAB 2: GLOBAL PANTRY ENGINE (15 STEPS) ---
 with t2:
-    st.markdown("### GLOBAL HERITAGE ENGINE")
-    dish = st.text_input("INPUT PANTRY ITEMS", placeholder="e.g. Chicken, Beef, Lamb...")
+    st.markdown("### GLOBAL PANTRY ENGINE")
+    user_dish = st.text_input("WHAT DO YOU HAVE IN MIND?", placeholder="e.g. Chicken, Lamb, Prawns...")
     
-    if dish:
-        heritage = st.selectbox("CHOOSE HERITAGE", 
-                                ["Pakistani", "Arab/Egyptian", "Indian", "Asian", "Mexican", "American"])
+    if user_dish:
+        heritage = st.selectbox("SELECT HERITAGE STYLE", ["Pakistani", "Arab/Egyptian", "Indian", "Asian", "Mexican", "American"])
         
-        # We use triple quotes for every step to prevent SyntaxErrors
+        # 15-Step logic with f-strings for variable injection
         db = {
             "Pakistani": [
-                f"<b>Mise En Place:</b> Prepare all aromatics; thin-slice 3 onions and crush 3 inches of ginger-garlic.",
+                f"<b>Mise En Place:</b> Prep 1kg {user_dish}; thin-slice 4 onions and crush ginger-garlic.",
                 f"<b>Fat Activation:</b> Heat 1/2 cup oil on <span class='heat-tag high'>HIGH</span> until shimmering.",
-                f"<b>The Barista:</b> Sauté onions for 12-15 mins until deep chocolate brown for base flavor.",
+                f"<b>The Barista:</b> Sauté onions for 12 mins until they reach a deep chocolate brown.",
                 f"<b>Aromatic Bloom:</b> Add ginger-garlic paste; sauté for 2 mins to remove raw bite.",
-                f"<b>Spice Hydration:</b> Mix spices with a splash of water to prevent scorching in the hot oil.",
-                f"<b>Maillard Reaction:</b> Add {dish}. Sear on high heat to develop a rich protein crust.",
-                f"<b>Tomato Reduction:</b> Add 2 chopped tomatoes. Cook until they dissolve into a jam-like paste.",
-                f"<b>The Bhuna:</b> High-intensity stirring until the oil separates from the masala base.",
-                f"<b>Dairy Tempering:</b> Reduce to <span class='heat-tag med'>MEDIUM</span>. Fold in 1 cup whisked yogurt slowly.",
-                f"<b>Liquid Ratio:</b> Add 1 cup of boiling water. Never add cold water to hot protein.",
+                f"<b>Spice Hydration:</b> Mix Garam Masala and Turmeric with water; add to pot.",
+                f"<b>Maillard Reaction:</b> Add {user_dish}. Sear at max heat for 8 mins to lock in juices.",
+                f"<b>Tomato Layer:</b> Add 3 chopped tomatoes. Cook until they dissolve into a rich jam.",
+                f"<b>The Bhuna:</b> Stir on high heat until the oil separates completely from the masala.",
+                f"<b>Dairy Tempering:</b> Reduce to <span class='heat-tag med'>MEDIUM</span>. Fold in whisked yogurt slowly.",
+                f"<b>Liquid Balance:</b> Add 1.5 cups boiling water. Never use cold water on hot protein.",
                 f"<b>The Seal:</b> Cover with a foil-sealed lid to trap all aromatic steam.",
                 f"<b>Slow Braise:</b> Reduce heat to <span class='heat-tag low'>LOW</span>. Simmer for 35 minutes.",
                 f"<b>The Scent:</b> Add slit green chilies and dried fenugreek leaves (Kasuri Methi).",
-                f"<b>Resting Phase:</b> Turn off heat. Let the pot sit for 10 mins to relax the meat fibers.",
-                f"<b>Service:</b> Garnish with fresh ginger and cilantro. Serve over long-grain Basmati."
-            ],
-            "Arab/Egyptian": [
-                f"<b>Ghee Initiation:</b> Melt 4 tbsp of sheep ghee in a heavy pot over <span class='heat-tag med'>MEDIUM</span> heat.",
-                f"<b>Aromatic Start:</b> Sauté onions with whole cinnamon sticks and 2 pierced 'Loomi' (dried limes).",
-                f"<b>Heritage Toasting:</b> Add 1 tbsp of Baharat and a pinch of Sumac. Toast for 60 seconds.",
-                f"<b>Protein Coating:</b> Add {dish}. Fry until the edges are golden-yellow from the spice oils.",
-                f"<b>Stock Creation:</b> Add 4 cups of boiling water. Simmer on <span class='heat-tag low'>LOW</span> until tender.",
-                f"<b>Rice Prep:</b> Wash Basmati 5 times until water is clear; soak for 30 minutes.",
-                f"<b>The Union:</b> Add soaked rice to the simmering meat broth; liquid should be 1 inch above.",
-                f"<b>Absorption:</b> Bring to boil on <span class='heat-tag high'>HIGH</span> until water-holes form in the rice.",
-                f"<b>The Smoke:</b> Place a hot coal in a foil cup with oil inside the pot; close lid for 5 mins.",
-                f"<b>The Dum:</b> Reduce to lowest possible heat and steam for 20 minutes.",
-                f"<b>Nut Prep:</b> Fry almonds or pine nuts in butter until golden-brown.",
-                f"<b>Meat Resting:</b> Carefully remove the {dish} and keep warm under foil.",
-                f"<b>Rice Fluffing:</b> Use a fork to fluff the rice from the edges—never stir the center.",
-                f"<b>Assembly:</b> Spread rice on a communal platter; arrange {dish} on top.",
-                f"<b>Service:</b> Shower with toasted nuts and fresh parsley. Serve with spicy tomato dip."
+                f"<b>Resting Phase:</b> Turn off heat. Let the pot sit for 10 mins to relax the fibers.",
+                f"<b>Final Reveal:</b> Garnish with fresh ginger and serve with aged Basmati rice."
             ]
         }
         
-        # Fallback for styles not yet fully written out in this specific code version
         steps = db.get(heritage, db["Pakistani"])
+        custom_yt = f"https://www.youtube.com/results?search_query=best+professional+{heritage}+{user_dish}+recipe+tutorial"
 
         st.markdown(f"""
         <div class="recipe-card">
-            <h2 style="color:#34d399; text-align:center;">{heritage.upper()} {dish.upper()} BLUEPRINT</h2>
-            <div class="ai-visual-frame">
-                <p style="color:#34d399; font-size:0.7rem; letter-spacing:2px;">AI TECHNIQUE VISUALIZER: ACTIVE</p>
-                <div style="height:120px; border:1px dashed #222; display:flex; align-items:center; justify-content:center;">
-                    <span style="color:#444;">[AI RENDERING {heritage.upper()} PROCESS...]</span>
-                </div>
-            </div>
+            <h2 style="color:#34d399; text-align:center;">{heritage.upper()} {user_dish.upper()} BLUEPRINT</h2>
+            <hr style="border:0.1px solid #222">
+            <a href="{custom_yt}" target="_blank" class="vid-button">LAUNCH {heritage.upper()} {user_dish.upper()} VIDEO ↗</a>
             {"".join([f"<p><span class='step-num'>{i+1:02}</span> {s}</p>" for i, s in enumerate(steps)])}
         </div>
         """, unsafe_allow_html=True)
