@@ -1,109 +1,127 @@
 import streamlit as st
-import time
 import random
+import time
 
-# --- PRO CONFIG ---
-st.set_page_config(page_title="Aura Chef | Professional", page_icon="🍳", layout="wide")
+# --- PRO TERMINAL CONFIG ---
+st.set_page_config(page_title="AURA CHEF | GLOBAL", page_icon="⚖️", layout="wide")
 
-# --- PROFESSIONAL CSS ---
+# --- ULTIMATE PROFESSIONAL CSS ---
 st.markdown("""
 <style>
-    .stApp { background-color: #050505; color: #e0e0e0; font-family: 'Inter', sans-serif; }
-    .stTabs [data-baseweb="tab-list"] { gap: 20px; border-bottom: 1px solid #333; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+    
+    html, body, [class*="st-"] { font-family: 'Inter', sans-serif; background-color: #050505; color: #ffffff; }
+    
+    /* Tabs at the Top */
+    .stTabs [data-baseweb="tab-list"] { 
+        justify-content: center; gap: 50px; background-color: #000; padding: 20px; border-bottom: 1px solid #222; 
+    }
     .stTabs [data-baseweb="tab"] { 
-        height: 50px; background-color: transparent; border: none; 
-        color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+        font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; color: #666; transition: 0.4s;
     }
     .stTabs [data-baseweb="tab"]:hover { color: #fff; }
-    .stTabs [data-baseweb="tab-highlight"] { background-color: #fff; }
-    
+    .stTabs [data-baseweb="tab-highlight"] { background-color: #fff; height: 2px; }
+
+    /* Recipe Display */
     .recipe-output { 
-        background: #111; padding: 40px; border-radius: 4px; 
-        border: 1px solid #222; margin-top: 20px; line-height: 1.6;
+        background: #0a0a0a; padding: 40px; border-radius: 2px; border: 1px solid #1a1a1a; margin-top: 30px; 
     }
-    .status-bar { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-bottom: 10px; }
-    .chef-header { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 0px; }
+    .badge { padding: 4px 12px; font-size: 0.7rem; font-weight: 900; letter-spacing: 1px; border: 1px solid #444; margin-right: 10px; }
     
     .stButton>button {
-        border-radius: 2px; background: #fff; color: #000; 
-        font-weight: 700; border: none; padding: 12px; transition: 0.3s;
+        border-radius: 0px; background: #fff; color: #000; font-weight: 900; 
+        border: none; padding: 15px 40px; text-transform: uppercase; letter-spacing: 2px;
     }
-    .stButton>button:hover { background: #ccc; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- HEADER ---
-st.markdown('<p class="status-bar">AURA CHEF // V2.0 // TERMINAL ACCESS</p>', unsafe_allow_html=True)
-st.markdown('<h1 class="chef-header">AURA CHEF</h1>', unsafe_allow_html=True)
+# --- GLOBAL NAVIGATION (TOP TABS) ---
+tab1, tab2, tab3, tab4 = st.tabs(["SELECTION OF THE DAY", "PANTRY ENGINE", "RANDOMIZER", "GLOBAL ARCHIVE"])
 
-# --- TABS SYSTEM ---
-tab1, tab2, tab3 = st.tabs(["HOME", "PANTRY ENGINE", "RANDOMIZER"])
-
+# --- TAB 1: SELECTION OF THE DAY ---
 with tab1:
-    st.markdown("### Culinary Intelligence")
-    st.write("Aura Chef utilizes ingredient-mapping to generate precise Halal and Global recipes. Navigate to the Pantry Engine to begin.")
-    st.image("https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=1000", caption="Professional Kitchen Standards")
-
-with tab2:
-    st.markdown("### Pantry Engine")
-    
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        mode = st.selectbox("DIETARY MODE", ["Global", "Halal"])
-        preference = st.selectbox("PREFERENCE", ["All Options", "Vegetarian"])
-    
+    st.markdown("<h1 style='text-align: center; letter-spacing: -2px; font-weight: 900;'>SIGNATURE SELECTION</h1>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        items = st.text_area("INPUT INGREDIENTS (LIST SEPARATED BY COMMAS)", placeholder="e.g. Salmon, Asparagus, Lemon, Garlic...", height=150)
-        
-    if st.button("EXECUTE RECIPE GENERATION"):
-        if items:
-            with st.spinner("ANALYZING FLAVOR PROFILES..."):
-                time.sleep(1.5)
-                items_l = items.lower()
-                
-                # --- DYNAMIC RECIPE LOGIC ---
-                if "chicken" in items_l and "flour" in items_l:
-                    res_title = "Crispy Coated Poultry"
-                    res_steps = "1. Season flour heavily. 2. Dredge protein. 3. Fry at 180C. 4. Rest before service."
-                elif "pasta" in items_l or "tomato" in items_l:
-                    res_title = "Artisan Pasta Reduction"
-                    res_steps = "1. Boil salted water. 2. Sauté aromatics. 3. Reduce tomato base. 4. Emulsify sauce with pasta water."
-                elif "beef" in items_l or "potato" in items_l:
-                    res_title = "Steakhouse Style Service"
-                    res_steps = "1. Temper meat to room temp. 2. High-heat sear for Maillard reaction. 3. Oven-roast starch. 4. Compound butter finish."
-                else:
-                    res_title = "Custom Infusion Bowl"
-                    res_steps = "1. Mise en place all ingredients. 2. Sauté hard vegetables first. 3. Add delicate items last. 4. Balance with acidity (lemon/vinegar)."
-
-                st.markdown(f"""
-                <div class="recipe-output">
-                    <p class="status-bar">{mode.upper()} COMPLIANT // RECIPE LOADED</p>
-                    <h2 style="color:#fff;">{res_title}</h2>
-                    <hr style="border:0.1px solid #333">
-                    <p>{res_steps}</p>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.error("Error: Null input detected in Pantry Engine.")
-
-with tab3:
-    st.markdown("### Ingredient Randomizer")
-    st.write("Cannot decide? Let Aura Chef select your base components.")
-    
-    random_bases = ["Halal Beef", "Chicken Thighs", "Atlantic Salmon", "Chickpeas", "Lamb Chops"]
-    random_sides = ["Yukon Potatoes", "Jasmine Rice", "Quinoa", "Broccolini", "Sweet Potato"]
-    
-    if st.button("GENERATE RANDOM BASE"):
-        b = random.choice(random_bases)
-        s = random.choice(random_sides)
         st.markdown(f"""
-        <div class="recipe-output">
-            <h3 style="color:#fff;">Recommended Pairing:</h3>
-            <p style="font-size:1.5rem;">{b} + {s}</p>
-            <p>Use these as your core ingredients in the Pantry Engine.</p>
+        <div class="recipe-output" style="text-align: center;">
+            <span class="badge">HALAL</span><span class="badge">TRENDING</span>
+            <h2 style="margin-top:20px;">PAKISTANI CHAPLI BURGER</h2>
+            <p style="color: #888;">A fusion of traditional Peshawar flavors and modern American street food. Served with masala fries and mint chutney aioli.</p>
+            <hr style="border: 0.1px solid #222;">
+            <p style="font-size: 0.8rem; letter-spacing: 1px;">TIME: 35 MINS | DIFFICULTY: INTERMEDIATE</p>
         </div>
         """, unsafe_allow_html=True)
 
-# --- GLOBAL FOOTER ---
-st.markdown("---")
-st.caption("AURA CHEF // SECURE TERMINAL // 2026")
+# --- TAB 2: PANTRY ENGINE (THE CORE WORK) ---
+with tab2:
+    st.markdown("### PANTRY ENGINE")
+    st.caption("INPUT INGREDIENTS TO FILTER GLOBAL DATABASE")
+    
+    items = st.text_area("LIST ALL AVAILABLE INGREDIENTS", placeholder="Chicken, Soy Sauce, Ginger, Potato, Tortilla...", height=150)
+    
+    # Global Cuisine Logic
+    st.markdown("---")
+    c1, c2, c3, c4, c5 = st.columns(5)
+    pak = c1.checkbox("PAKISTANI")
+    ind = c2.checkbox("INDIAN")
+    mex = c3.checkbox("MEXICAN")
+    asi = c4.checkbox("ASIAN")
+    ame = c5.checkbox("AMERICAN")
+
+    if st.button("EXECUTE ENGINE"):
+        with st.spinner("SCANNING CULINARY MATRICES..."):
+            time.sleep(1)
+            items_l = items.lower()
+            
+            # Dynamic Cuisine Logic
+            if pak or ind:
+                res_title = "Aromatic Karahi Fusion"
+                res_steps = "1. Temper cumin and cardamom in oil. 2. Sauté aromatics. 3. Slow-simmer protein. 4. Finish with fresh ginger."
+            elif mex:
+                res_title = "Street Style Street Tacos"
+                res_steps = "1. Char tortillas. 2. High-heat sear protein. 3. Create lime-acid reduction. 4. Top with fresh cilantro."
+            elif asi:
+                res_title = "Wok-Fired Glaze Stir-fry"
+                res_steps = "1. High-heat wok prep. 2. Flash-fry vegetables. 3. Deglaze with soy/ginger. 4. Serve over steamed base."
+            else:
+                res_title = "Standard Professional Service"
+                res_steps = "1. Mise en place. 2. Pan-sear protein. 3. Deglaze for sauce. 4. Garnish and plate."
+
+            st.markdown(f"""
+            <div class="recipe-output">
+                <h3 style="color:#fff;">{res_title}</h3>
+                <p style="color:#888;">BASED ON DATA: {items}</p>
+                <hr style="border:0.1px solid #222">
+                <p>{res_steps}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+# --- TAB 3: RANDOMIZER ---
+with tab3:
+    st.markdown("### CULINARY RANDOMIZER")
+    st.write("DECISION ENGINE FOR UNDETERMINED INPUTS")
+    
+    if st.button("GENERATE RANDOM PROFILE"):
+        cuisine_list = ["Pakistani Biryani", "Mexican Enchiladas", "American Smash Burgers", "Indian Butter Chicken", "Asian Ramen"]
+        result = random.choice(cuisine_list)
+        st.markdown(f"""
+        <div class="recipe-output" style="text-align:center;">
+            <p class="badge">SYSTEM CHOICE</p>
+            <h1 style="color:#fff;">{result}</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+# --- TAB 4: GLOBAL ARCHIVE ---
+with tab4:
+    st.markdown("### GLOBAL CUISINE ARCHIVE")
+    st.write("Browse regional food categories.")
+    st.info("The archive includes Halal, Vegetarian, and Global variations for all 5 major regions.")
+    st.table({
+        "Region": ["Pakistani", "American", "Indian", "Asian", "Mexican"],
+        "Signature": ["Karahi", "Burgers", "Paneer", "Stir-fry", "Tacos"],
+        "Status": ["Halal Only", "Global", "Veg/Halal", "Global", "Halal Option"]
+    })
+
+# --- FOOTER ---
+st.markdown("<br><br><p style='text-align: center; color: #333; font-size: 0.7rem;'>AURA CHEF // GLOBAL ACCESS // 2026</p>", unsafe_allow_html=True)
