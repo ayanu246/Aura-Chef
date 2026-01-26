@@ -1,2 +1,2 @@
-# Aura-Chef
-# Aura-Chef - A global recipe engine with Halal and Vegetarian modes.
+# Aura Chef 👨‍🍳
+A universal recipe generator that turns your leftovers into gourmet meals. Supports Global and Halal modes.
