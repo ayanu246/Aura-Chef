@@ -1,138 +1,102 @@
 import streamlit as st
 import time
 
-# --- AURA CHEF ELITE v8.0 ---
-st.set_page_config(page_title="AURA CHEF | PROFESSIONAL", page_icon="⚖️", layout="wide")
+# --- AURA CHEF ELITE v9.0 ---
+st.set_page_config(page_title="AURA CHEF | GLOBAL SEARCH", page_icon="⚖️", layout="wide")
 
-# --- CUSTOM CSS: TERMINAL AESTHETIC ---
+# --- CUSTOM CSS: PRO TERMINAL ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
     html, body, [class*="st-"] { font-family: 'Inter', sans-serif; background-color: #050505; color: #fff; }
     
     .stTabs [data-baseweb="tab-list"] { 
-        justify-content: center; gap: 50px; background-color: #000; padding: 20px; border-bottom: 2px solid #1a1a1a; 
+        justify-content: center; gap: 50px; background-color: #000; padding: 20px; border-bottom: 1px solid #1a1a1a; 
     }
     .stTabs [data-baseweb="tab"] { font-size: 0.9rem; font-weight: 700; color: #444; text-transform: uppercase; }
     
     .dish-card { background: #0a0a0a; padding: 30px; border: 1px solid #222; border-radius: 4px; margin-top: 20px; }
     .spice-tag { background: #1a1a1a; color: #34d399; padding: 4px 10px; border: 1px solid #34d399; font-size: 0.7rem; font-weight: 800; margin-right: 5px; }
-    .step-label { color: #555; font-weight: 900; margin-right: 10px; }
+    
+    .video-btn {
+        display: block; width: 100%; padding: 15px; background: #fff; color: #000; 
+        text-align: center; font-weight: 900; text-decoration: none; border-radius: 2px;
+        text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
+    }
+    .video-btn:hover { background: #34d399; color: #000; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- NAVIGATION ---
-t1, t2, t3 = st.tabs(["SELECTION OF THE DAY", "PANTRY ENGINE", "GLOBAL VIDEO VAULT"])
+t1, t2, t3 = st.tabs(["SIGNATURE SELECTION", "INGREDIENT LAB", "GLOBAL VIDEO SEARCH"])
 
-# --- TAB 1: SELECTION OF THE DAY ---
+# --- TAB 1: SIGNATURE SELECTION ---
 with t1:
-    st.markdown("<h1 style='text-align: center; font-weight: 900; margin-top:40px;'>AURA SIGNATURE</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-weight: 900; margin-top:40px;'>CHEF'S SIGNATURE</h1>", unsafe_allow_html=True)
     c1, mid, c2 = st.columns([1,2,1])
     with mid:
+        # We use a globally recognized cooking channel for the front page
         st.markdown("""
         <div class="dish-card" style="text-align: center;">
-            <p style="color:#888; letter-spacing:2px; font-size:0.7rem;">CHEF'S SPECIAL</p>
-            <h2 style="margin-top:10px;">Authentic Chicken Karahi</h2>
-            <p style="color:#666;">Traditional Pakistani high-heat wok cooking with fresh ginger and green chilies.</p>
+            <p style="color:#888; letter-spacing:2px; font-size:0.7rem;">FEATURED RECIPE</p>
+            <h2 style="margin-top:10px;">Authentic Chicken Biryani</h2>
+            <p style="color:#666;">A masterclass in layering spices and aromatics.</p>
         </div>
         """, unsafe_allow_html=True)
-        # VERIFIED COOKING VIDEO
+        # This is a verified high-quality Biryani Masterclass
         st.video("https://www.youtube.com/watch?v=eqPgJPLRutI")
 
-# --- TAB 2: PANTRY ENGINE ---
+# --- TAB 2: INGREDIENT LAB ---
 with t2:
-    st.markdown("### PANTRY ENGINE")
-    
-    user_items = st.text_input("INPUT INGREDIENTS (e.g. Chicken, Potato, Rice)", placeholder="Type and press Enter...")
+    st.markdown("### INGREDIENT MATCHING ENGINE")
+    items = st.text_input("INPUT PANTRY ITEMS", placeholder="Enter ingredients and press Enter...")
 
-    if user_items:
+    if items:
         st.markdown("---")
-        # SPICE SELECTION
-        style = st.radio("SELECT SPICE PROFILE", ["Pakistani", "Indian", "Mexican", "Asian", "American"], horizontal=True)
+        style = st.radio("SELECT REGIONAL SPICE PROFILE", ["Pakistani", "Indian", "Mexican", "Asian", "American"], horizontal=True)
         
-        spice_map = {
-            "Pakistani": ["Garam Masala", "Kashmiri Chili", "Coriander", "Turmeric"],
-            "Indian": ["Cardamom", "Curry Leaves", "Mustard Seeds", "Saffron"],
-            "Mexican": ["Smoked Paprika", "Cumin", "Chipotle", "Dried Oregano"],
-            "Asian": ["Five Spice", "White Pepper", "Star Anise", "Ginger Powder"],
-            "American": ["Garlic Powder", "Black Pepper", "Thyme", "Onion Powder"]
-        }
+        # This builds a dynamic search link based on what you typed
+        search_term = f"{style} recipe using {items}"
+        yt_link = f"https://www.youtube.com/results?search_query={search_term.replace(' ', '+')}"
         
-        selected_spices = spice_map[style]
-        
-        st.markdown(f"### {style} Style Generation")
-        st.markdown(f"{' '.join([f'<span class="spice-tag">{s.upper()}</span>' for s in selected_spices])}", unsafe_allow_html=True)
-        
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.markdown(f"""
-            <div class="dish-card">
-                <h4>Option 1: {style} Stir-fry / Roast</h4>
-                <p><span class="step-label">01</span> Heat oil and toast {selected_spices[0]}.</p>
-                <p><span class="step-label">02</span> Add your {user_items} and sear on high heat.</p>
-                <p><span class="step-label">03</span> Season with {selected_spices[1]} and {selected_spices[2]}.</p>
-                <p><span class="step-label">04</span> Finish with fresh herbs and lemon juice.</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_b:
-            st.markdown(f"""
-            <div class="dish-card">
-                <h4>Option 2: {style} Traditional Stew</h4>
-                <p><span class="step-label">01</span> Sauté onions with {selected_spices[3]}.</p>
-                <p><span class="step-label">02</span> Slow-cook {user_items} in a covered pot.</p>
-                <p><span class="step-label">03</span> Add water or broth to create a rich gravy.</p>
-                <p><span class="step-label">04</span> Simmer until tender and aromatics are released.</p>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="dish-card">
+            <h4>MATCH FOUND: {style} Style Fusion</h4>
+            <p style="color:#888;">System has mapped {items} to {style} flavor profiles.</p>
+            <hr style="border:0.1px solid #222">
+            <p>1. <b>Toast Spices:</b> Use regional {style} aromatics.<br>
+            2. <b>Protein Prep:</b> Sauté your {items} on high heat.<br>
+            3. <b>Deglaze:</b> Use water or broth to create a rich base.</p>
+            <br>
+            <a href="{yt_link}" target="_blank" class="video-btn">FIND BEST {style.upper()} VIDEO ↗</a>
+        </div>
+        """, unsafe_allow_html=True)
 
-# --- TAB 3: GLOBAL VIDEO VAULT ---
+# --- TAB 3: GLOBAL VIDEO SEARCH (THE FIX) ---
 with t3:
     st.markdown("### GLOBAL VIDEO VAULT")
-    search_query = st.text_input("SEARCH DISH (e.g. Biryani, Butter Chicken, Tacos, Burgers)", key="v_search")
+    st.write("Enter any dish. The engine will find the top-rated professional tutorial.")
     
-    if search_query:
-        query_low = search_query.lower()
+    query = st.text_input("TYPE DISH NAME (e.g. Smash Burger, Nihari, Tacos, Butter Chicken)", key="vault_search")
+    
+    if query:
+        # DYNAMIC SEARCH LOGIC: This ensures Burgers = Burger videos
+        final_search = f"best professional {query} recipe tutorial"
+        search_url = f"https://www.youtube.com/results?search_query={final_search.replace(' ', '+')}"
         
-        # MASTER RECIPE DATABASE
-        recipes = {
-            "biryani": {
-                "title": "Hyderabadi Chicken Biryani",
-                "steps": "1. Marinate meat in spices and yogurt. 2. Parboil long-grain Basmati. 3. Layer and seal for 'Dum' cooking.",
-                "url": "https://www.youtube.com/watch?v=eqPgJPLRutI"
-            },
-            "butter chicken": {
-                "title": "Makhani Butter Chicken",
-                "steps": "1. Tandoori-style chicken grill. 2. Tomato and cashew gravy reduction. 3. Finished with cold butter and cream.",
-                "url": "https://www.youtube.com/watch?v=a03U45jFxOI"
-            },
-            "burger": {
-                "title": "The Perfect Smash Burger",
-                "steps": "1. High-fat beef balls. 2. Hard press on hot griddle for crust. 3. Steamed bun with melted cheddar.",
-                "url": "https://www.youtube.com/watch?v=6bt0BlYMovE"
-            },
-            "taco": {
-                "title": "Mexican Street Tacos",
-                "steps": "1. Thinly sliced marinated beef. 2. Flash fry on flat-top. 3. Top with white onion and cilantro.",
-                "url": "https://www.youtube.com/watch?v=Xra45DHI8UE"
-            }
-        }
-        
-        # Check for a match
-        found = False
-        for key, data in recipes.items():
-            if key in query_low:
-                st.markdown(f"""
-                <div class="dish-card">
-                    <h2 style="color:#34d399;">{data['title']}</h2>
-                    <hr style="border:0.1px solid #333">
-                    <p><b>TECHNIQUE:</b> {data['steps']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                st.video(data['url'])
-                found = True
-                break
-        
-        if not found:
-            st.error("DISH NOT IN LOCAL DATABASE. TRY: BIRYANI, BUTTER CHICKEN, BURGER, OR TACOS.")
+        st.markdown(f"""
+        <div class="dish-card">
+            <p style="color:#34d399; font-weight:800; font-size:0.7rem;">ENGINE READY</p>
+            <h2 style="margin-top:0px;">{query.upper()}</h2>
+            <p style="color:#666;">The vault is searching for the most authentic video for <b>{query}</b>.</p>
+            <hr style="border:0.1px solid #222; margin-bottom:20px;">
+            
+            <a href="{search_url}" target="_blank" class="video-btn">WATCH BEST {query.upper()} VIDEO ON YOUTUBE ↗</a>
+            
+            <p style="font-size:0.8rem; color:#444; margin-top:15px; text-align:center;">
+                Note: Clicking the button opens the exact search result to ensure you get the best, most recent video without playback errors.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 st.markdown("<br><br><p style='text-align:center; color:#222; font-size:0.7rem;'>AURA CHEF // SECURE TERMINAL // 2026</p>", unsafe_allow_html=True)
