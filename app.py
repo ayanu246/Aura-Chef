@@ -1,71 +1,136 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
+import random
+import time
 
-# --- ELITE TERMINAL CONFIG ---
-st.set_page_config(page_title="AURUM | WEALTH TERMINAL", page_icon="💰", layout="wide")
+# --- GAME ENGINE CONFIG ---
+st.set_page_config(page_title="NEON SYNDICATE", page_icon="⚡", layout="wide")
 
+# Custom CSS for a "Gamer" UI
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-    html, body, [class*="st-"] { font-family: 'Inter', sans-serif; background-color: #050505; color: #fff; }
-    .metric-card {
-        background: #0a0a0a; border: 1px solid #1f1f1f; padding: 25px; border-radius: 10px;
-        text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;700&display=swap');
+    
+    html, body, [class*="st-"] { 
+        background-color: #050505; 
+        color: #e0e0e0;
+        font-family: 'Inter', sans-serif;
     }
-    .status-online { color: #34d399; font-weight: 900; font-size: 0.8rem; }
-    .gold-text { color: #fbbf24; font-weight: 900; }
+    
+    .game-header {
+        font-family: 'Orbitron', sans-serif;
+        color: #34d399;
+        text-align: center;
+        letter-spacing: 5px;
+        text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
+    }
+    
+    .stat-card {
+        background: #0a0a0a;
+        border: 1px solid #1f1f1f;
+        padding: 20px;
+        border-radius: 5px;
+        text-align: center;
+    }
+    
+    .terminal-box {
+        background: #000;
+        border-left: 5px solid #34d399;
+        padding: 20px;
+        font-family: 'Courier New', monospace;
+        color: #34d399;
+        margin: 20px 0;
+    }
+    
+    .stButton>button {
+        width: 100%;
+        background: transparent;
+        border: 1px solid #34d399;
+        color: #34d399;
+        font-family: 'Orbitron', sans-serif;
+        padding: 15px;
+        transition: 0.3s;
+    }
+    
+    .stButton>button:hover {
+        background: #34d399;
+        color: #000;
+        box-shadow: 0 0 20px #34d399;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# --- HEADER SECTION ---
-c1, c2 = st.columns([3, 1])
-with c1:
-    st.markdown("<h1 style='letter-spacing:-2px; font-weight:900;'>AURUM <span style='color:#34d399;'>CORE</span></h1>", unsafe_allow_html=True)
-    st.markdown("<p class='status-online'>● ENCRYPTED TERMINAL ACTIVE // 2026</p>", unsafe_allow_html=True)
+# --- SESSION STATE (The Game Save) ---
+if 'credits' not in st.session_state:
+    st.session_state.credits = 1000
+if 'rep' not in st.session_state:
+    st.session_state.rep = 0
+if 'logs' not in st.session_state:
+    st.session_state.logs = ["SYNDICATE TERMINAL INITIALIZED...", "AWAITING ORDERS..."]
 
-with c2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.button("SECURE LOGOUT")
+# --- SIDEBAR HUD ---
+st.sidebar.markdown("<h2 class='game-header'>HUD</h2>", unsafe_allow_html=True)
+st.sidebar.markdown(f"**CREDITS:** ${st.session_state.credits:,}")
+st.sidebar.markdown(f"**REPUTATION:** {st.session_state.rep} XP")
+if st.sidebar.button("RESET DATA"):
+    st.session_state.credits = 1000
+    st.session_state.rep = 0
+    st.rerun()
 
+# --- MAIN SCREEN ---
+st.markdown("<h1 class='game-header'>NEON SYNDICATE</h1>", unsafe_allow_html=True)
+
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    st.markdown("### AVAILABLE OPERATIONS")
+    
+    # OP 1: Market Hack
+    with st.expander("NETWORK INFILTRATION (Risk: Low)"):
+        st.write("Hack a local credit exchange. Safe but low yield.")
+        if st.button("EXECUTE HACK"):
+            gain = random.randint(50, 200)
+            st.session_state.credits += gain
+            st.session_state.rep += 5
+            st.session_state.logs.insert(0, f"SUCCESS: Infiltrated exchange. Gained ${gain}.")
+            st.rerun()
+
+    # OP 2: High Stakes Heist
+    with st.expander("VALT-TECH HEIST (Risk: HIGH)"):
+        st.write("Heavy security. Massive payout. High chance of failure.")
+        if st.button("LAUNCH HEIST"):
+            if random.random() > 0.6:
+                gain = random.randint(2000, 5000)
+                st.session_state.credits += gain
+                st.session_state.rep += 50
+                st.session_state.logs.insert(0, f"CRITICAL SUCCESS: Vault breached! Gained ${gain}.")
+            else:
+                loss = 500
+                st.session_state.credits -= loss
+                st.session_state.logs.insert(0, f"FAILED: Security caught the signal. Lost ${loss} in bribes.")
+            st.rerun()
+
+with col2:
+    st.markdown("### LIVE FEED")
+    log_text = "\n".join(st.session_state.logs[:8])
+    st.markdown(f"<div class='terminal-box'>{log_text}</div>", unsafe_allow_html=True)
+
+# --- ASSET ARCHITECT (The Million Dollar Growth) ---
 st.write("---")
+st.markdown("### SYNDICATE ASSETS")
+a1, a2, a3 = st.columns(3)
 
-# --- HIGH-LEVEL METRICS ---
-m1, m2, m3, m4 = st.columns(4)
-with m1:
-    st.markdown('<div class="metric-card"><h4>TOTAL LIQUIDITY</h4><h2 style="color:#34d399;">$1.24M</h2><p style="color:gray;">+12.4%</p></div>', unsafe_allow_html=True)
-with m2:
-    st.markdown('<div class="metric-card"><h4>ASSET VALUATION</h4><h2 style="color:#fbbf24;">$4.82M</h2><p style="color:gray;">STABLE</p></div>', unsafe_allow_html=True)
-with m3:
-    st.markdown('<div class="metric-card"><h4>ACTIVE VENTURES</h4><h2>14</h2><p style="color:#34d399;">3 NEW</p></div>', unsafe_allow_html=True)
-with m4:
-    st.markdown('<div class="metric-card"><h4>RISK INDEX</h4><h2 style="color:#f87171;">LOW</h2><p style="color:gray;">HEDGED</p></div>', unsafe_allow_html=True)
+with a1:
+    st.markdown('<div class="stat-card"><h4>CRYPTO RIGS</h4><p>Generates $10/sec</p></div>', unsafe_allow_html=True)
+    if st.button("PURCHASE ($500)"):
+        if st.session_state.credits >= 500:
+            st.session_state.credits -= 500
+            st.session_state.logs.insert(0, "ASSET ACQUIRED: Crypto Rig online.")
+            st.rerun()
 
-# --- MAIN ENGINE TABS ---
-tab1, tab2, tab3 = st.tabs(["MARKET INTELLIGENCE", "ASSET ARCHITECT", "REVENUE PIPELINE"])
+with a2:
+    st.markdown('<div class="stat-card"><h4>NEURAL LINK</h4><p>+20% Success Rate</p></div>', unsafe_allow_html=True)
+    st.button("UPGRADE ($2000)")
 
-with tab1:
-    st.markdown("### GLOBAL PERFORMANCE INDEX")
-    # Generating dummy million-dollar data
-    chart_data = pd.DataFrame(np.random.randn(20, 3), columns=['Venture A', 'Venture B', 'Crypto Index'])
-    st.line_chart(chart_data)
-
-with tab2:
-    st.markdown("### BUILD NEW ASSET CLASS")
-    c1, c2 = st.columns(2)
-    with c1:
-        asset_name = st.text_input("ASSET NAME", placeholder="e.g., Dubai Real Estate Fund")
-        asset_type = st.selectbox("CATEGORY", ["Real Estate", "Tech Startup", "Commodities", "Luxury Goods"])
-    with c2:
-        investment = st.number_input("INITIAL CAPITAL ($)", min_value=10000, value=100000, step=10000)
-        st.markdown(f"<br><h3 class='gold-text'>EST. ROI: ${investment * 1.4:,.2f}</h3>", unsafe_allow_html=True)
-
-with tab3:
-    st.markdown("### REVENUE STREAM LOGIC")
-    st.table({
-        "Source": ["SaaS Platform", "E-com Network", "Real Estate", "Private Equity"],
-        "Monthly Yield": ["$42,000", "$18,500", "$12,000", "$95,000"],
-        "Status": ["Scaling", "Optimization", "Passive", "Growth"]
-    })
-
-st.markdown("<br><p style='text-align:center; color:#333; font-size:0.7rem;'>AURUM GLOBAL SYSTEMS // PRIVATE ACCESS ONLY</p>", unsafe_allow_html=True)
+with a3:
+    st.markdown('<div class="stat-card"><h4>BLACK MARKET</h4><p>Unlocks High-Tier Ops</p></div>', unsafe_allow_html=True)
+    st.button("UNLOCK ($5000)")
