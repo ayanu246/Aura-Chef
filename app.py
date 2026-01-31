@@ -1,136 +1,101 @@
 import streamlit as st
-import random
-import time
+import streamlit.components.v1 as components
 
-# --- GAME ENGINE CONFIG ---
-st.set_page_config(page_title="NEON SYNDICATE", page_icon="⚡", layout="wide")
+# --- AURACRAFT GAME CONFIG ---
+st.set_page_config(page_title="AURACRAFT | VOXEL WORLD", layout="wide")
 
-# Custom CSS for a "Gamer" UI
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;700&display=swap');
-    
-    html, body, [class*="st-"] { 
-        background-color: #050505; 
-        color: #e0e0e0;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .game-header {
-        font-family: 'Orbitron', sans-serif;
-        color: #34d399;
-        text-align: center;
-        letter-spacing: 5px;
-        text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
-    }
-    
-    .stat-card {
-        background: #0a0a0a;
-        border: 1px solid #1f1f1f;
-        padding: 20px;
-        border-radius: 5px;
-        text-align: center;
-    }
-    
-    .terminal-box {
-        background: #000;
-        border-left: 5px solid #34d399;
-        padding: 20px;
-        font-family: 'Courier New', monospace;
-        color: #34d399;
-        margin: 20px 0;
-    }
-    
-    .stButton>button {
-        width: 100%;
-        background: transparent;
-        border: 1px solid #34d399;
-        color: #34d399;
-        font-family: 'Orbitron', sans-serif;
-        padding: 15px;
-        transition: 0.3s;
-    }
-    
-    .stButton>button:hover {
-        background: #34d399;
-        color: #000;
-        box-shadow: 0 0 20px #34d399;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap');
+    html, body, [class*="st-"] { background-color: #121212; color: #34d399; font-family: 'Courier Prime', monospace; }
+    .game-title { text-align: center; font-size: 3rem; text-shadow: 2px 2px #000; margin-bottom: 10px; }
+    .hud { background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid #34d399; border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE (The Game Save) ---
-if 'credits' not in st.session_state:
-    st.session_state.credits = 1000
-if 'rep' not in st.session_state:
-    st.session_state.rep = 0
-if 'logs' not in st.session_state:
-    st.session_state.logs = ["SYNDICATE TERMINAL INITIALIZED...", "AWAITING ORDERS..."]
+st.markdown("<h1 class='game-title'>AURACRAFT v1.0</h1>", unsafe_allow_html=True)
 
-# --- SIDEBAR HUD ---
-st.sidebar.markdown("<h2 class='game-header'>HUD</h2>", unsafe_allow_html=True)
-st.sidebar.markdown(f"**CREDITS:** ${st.session_state.credits:,}")
-st.sidebar.markdown(f"**REPUTATION:** {st.session_state.rep} XP")
-if st.sidebar.button("RESET DATA"):
-    st.session_state.credits = 1000
-    st.session_state.rep = 0
-    st.rerun()
+# --- THE 3D VOXEL ENGINE (THREE.JS BYPASS) ---
+# This code creates a 3D world with a player, grass blocks, and sky.
+game_code = """
+<div id="renderer-target" style="width: 100%; height: 600px; cursor: crosshair; border: 5px solid #34d399; border-radius: 15px;"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    const container = document.getElementById('renderer-target');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Sky Blue
+    
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
 
-# --- MAIN SCREEN ---
-st.markdown("<h1 class='game-header'>NEON SYNDICATE</h1>", unsafe_allow_html=True)
+    // Light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 20, 10);
+    scene.add(directionalLight);
 
-col1, col2 = st.columns([2, 1])
+    // Voxel World Generation (The "Minecraft" Floor)
+    const loader = new THREE.TextureLoader();
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    
+    // Simple block colors for now (Green for Grass, Brown for Dirt)
+    const grassMat = new THREE.MeshLambertMaterial({ color: 0x567d46 });
+    
+    for (let x = -10; x < 10; x++) {
+        for (let z = -10; z < 10; z++) {
+            const cube = new THREE.Mesh(geometry, grassMat);
+            cube.position.set(x, 0, z);
+            // Adding a slight random height for "Terrain"
+            cube.position.y = Math.floor(Math.random() * 0.2); 
+            scene.add(cube);
+        }
+    }
+
+    camera.position.set(0, 5, 10);
+    camera.lookAt(0, 0, 0);
+
+    // Animation Loop
+    function animate() {
+        requestAnimationFrame(animate);
+        // Rotate the world slightly so you can see it's 3D
+        scene.rotation.y += 0.003; 
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize listener
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+</script>
+"""
+
+col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.markdown("### AVAILABLE OPERATIONS")
-    
-    # OP 1: Market Hack
-    with st.expander("NETWORK INFILTRATION (Risk: Low)"):
-        st.write("Hack a local credit exchange. Safe but low yield.")
-        if st.button("EXECUTE HACK"):
-            gain = random.randint(50, 200)
-            st.session_state.credits += gain
-            st.session_state.rep += 5
-            st.session_state.logs.insert(0, f"SUCCESS: Infiltrated exchange. Gained ${gain}.")
-            st.rerun()
-
-    # OP 2: High Stakes Heist
-    with st.expander("VALT-TECH HEIST (Risk: HIGH)"):
-        st.write("Heavy security. Massive payout. High chance of failure.")
-        if st.button("LAUNCH HEIST"):
-            if random.random() > 0.6:
-                gain = random.randint(2000, 5000)
-                st.session_state.credits += gain
-                st.session_state.rep += 50
-                st.session_state.logs.insert(0, f"CRITICAL SUCCESS: Vault breached! Gained ${gain}.")
-            else:
-                loss = 500
-                st.session_state.credits -= loss
-                st.session_state.logs.insert(0, f"FAILED: Security caught the signal. Lost ${loss} in bribes.")
-            st.rerun()
+    components.html(game_code, height=620)
 
 with col2:
-    st.markdown("### LIVE FEED")
-    log_text = "\n".join(st.session_state.logs[:8])
-    st.markdown(f"<div class='terminal-box'>{log_text}</div>", unsafe_allow_html=True)
+    st.markdown("### PLAYER HUD")
+    st.markdown("""
+    <div class='hud'>
+    <b>INVENTORY:</b><br>
+    - [G] Grass Block x64<br>
+    - [D] Dirt Block x64<br>
+    <br>
+    <b>WORLD INFO:</b><br>
+    Biome: Plains<br>
+    Chunk: 0, 0, 0<br>
+    FPS: 60
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("RESPAWN PLAYER"):
+        st.rerun()
 
-# --- ASSET ARCHITECT (The Million Dollar Growth) ---
-st.write("---")
-st.markdown("### SYNDICATE ASSETS")
-a1, a2, a3 = st.columns(3)
-
-with a1:
-    st.markdown('<div class="stat-card"><h4>CRYPTO RIGS</h4><p>Generates $10/sec</p></div>', unsafe_allow_html=True)
-    if st.button("PURCHASE ($500)"):
-        if st.session_state.credits >= 500:
-            st.session_state.credits -= 500
-            st.session_state.logs.insert(0, "ASSET ACQUIRED: Crypto Rig online.")
-            st.rerun()
-
-with a2:
-    st.markdown('<div class="stat-card"><h4>NEURAL LINK</h4><p>+20% Success Rate</p></div>', unsafe_allow_html=True)
-    st.button("UPGRADE ($2000)")
-
-with a3:
-    st.markdown('<div class="stat-card"><h4>BLACK MARKET</h4><p>Unlocks High-Tier Ops</p></div>', unsafe_allow_html=True)
-    st.button("UNLOCK ($5000)")
+st.info("NOTE: This is a live 3D WebGL engine. If it looks static, click the window to initialize the camera.")
