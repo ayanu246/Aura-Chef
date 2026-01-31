@@ -1,122 +1,59 @@
-import streamlit as st
-import streamlit.components.v1 as components
+from ursina import *
+from ursina.prefabs.first_person_controller import FirstPersonController
 
-# --- AURACRAFT: FULL REPLICA CONFIG ---
-st.set_page_config(page_title="AURACRAFT REPLICA", layout="wide")
+# 1. Initialize the Engine
+app = Ursina()
 
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-    html, body, [class*="st-"] { background-color: #1a1a1a; color: #fff; font-family: 'VT323', monospace; }
-    .stSelectbox, .stButton { border: 2px solid #34d399 !important; }
-    .hud-box { background: rgba(0,0,0,0.9); border: 3px solid #555; padding: 15px; image-rendering: pixelated; }
-    .health-bar { color: #ff4b4b; font-size: 24px; }
-</style>
-""", unsafe_allow_html=True)
+# 2. Define Assets (You can change these strings to your file names later)
+# If you have 'grass.png' in your folder, use texture='grass'
+textures = {
+    'grass': 'grass_block', # Placeholder for built-in texture
+    'dirt':  'dirt_block',
+    'stone': 'stone_block',
+    'brick': 'brick'
+}
 
-# --- THE GAME ENGINE (3D INTERACTION LAYER) ---
-# This script handles the Creative/Survival logic and block physics.
-game_engine = """
-<div id="game-viewport" style="width: 100%; height: 700px; border: 4px solid #34d399; position: relative;">
-    <div id="crosshair" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; pointer-events: none;">+</div>
-</div>
+current_texture = textures['grass']
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-    const container = document.getElementById('game-viewport');
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB);
-    
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: false });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
+# 3. Define the Block (Voxel) Logic
+class Voxel(Button):
+    def __init__(self, position=(0,0,0), texture=textures['grass']):
+        super().__init__(
+            parent=scene,
+            position=position,
+            model='cube',
+            origin_y=0.5,
+            texture=texture,
+            color=color.color(0, 0, random.uniform(0.9, 1.0)),
+            highlight_color=color.light_gray,
+        )
 
-    // Block Textures (Colors for internal replica)
-    const blockTypes = {
-        grass: 0x567d46,
-        dirt: 0x8b4513,
-        stone: 0x808080,
-        wood: 0xa0522d,
-        leaves: 0x228b22
-    };
+    def input(self, key):
+        if self.hovered:
+            # Place Block
+            if key == 'right mouse down':
+                Voxel(position=self.position + mouse.normal, texture=current_texture)
+            
+            # Break Block
+            if key == 'left mouse down':
+                destroy(self)
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    
-    // Initial World Gen (The Flatgrass)
-    for (let x = -8; x < 8; x++) {
-        for (let z = -8; z < 8; z++) {
-            const material = new THREE.MeshLambertMaterial({ color: blockTypes.grass });
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x, 0, z);
-            scene.add(cube);
-        }
-    }
+# 4. Handle Keyboard Inputs for Block Selection
+def update():
+    global current_texture
+    if held_keys['1']: current_texture = textures['grass']
+    if held_keys['2']: current_texture = textures['dirt']
+    if held_keys['3']: current_texture = textures['stone']
+    if held_keys['4']: current_texture = textures['brick']
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 20, 10);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x404040));
+# 5. World Generation (A simple 15x15 floor)
+for z in range(15):
+    for x in range(15):
+        Voxel(position=(x, 0, z))
 
-    camera.position.set(0, 5, 10);
-    camera.lookAt(0, 0, 0);
+# 6. Player and Environment
+player = FirstPersonController()
+sky = Sky() # Adds a simple background sky
 
-    // Render Loop
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-    }
-    animate();
-    
-    // Communication with Streamlit
-    window.addEventListener('mousedown', (event) => {
-        // Here we would add the logic to "Break" or "Place" blocks
-        // Based on the selected block in the sidebar
-    });
-</script>
-"""
-
-# --- SIDEBAR: GAME MODES & INVENTORY ---
-with st.sidebar:
-    st.markdown("# ⚒️ AURACRAFT")
-    mode = st.radio("GAME MODE", ["Survival", "Creative"])
-    
-    st.markdown("---")
-    st.markdown("### 🎒 INVENTORY")
-    selected_block = st.selectbox("SELECT BLOCK", ["Grass", "Dirt", "Stone", "Wood Log", "Leaves"])
-    
-    if mode == "Survival":
-        st.markdown("### ❤️ HEALTH")
-        st.markdown("<p class='health-bar'>♥♥♥♥♥♥♥♥♥♥</p>", unsafe_allow_html=True)
-        st.markdown("### 🍗 HUNGER")
-        st.markdown("<p style='color:#e67e22; font-size:24px;'>🍗🍗🍗🍗🍗</p>", unsafe_allow_html=True)
-    else:
-        st.success("FLYING ENABLED (Creative)")
-        st.info("Infinite Blocks Available")
-
-# --- MAIN VIEWPORT ---
-col1, col2 = st.columns([4, 1])
-
-with col1:
-    components.html(game_engine, height=720)
-
-with col2:
-    st.markdown("### 🕹️ COMMANDS")
-    st.markdown("""
-    <div class='hud-box'>
-    <b>[W,A,S,D]</b> Walk<br>
-    <b>[SPACE]</b> Jump/Fly<br>
-    <b>[L-CLICK]</b> Destroy<br>
-    <b>[R-CLICK]</b> Build<br>
-    <b>[1-9]</b> Select Slot<br>
-    <hr>
-    <b>COORD:</b> 0, 64, 0<br>
-    <b>FPS:</b> 120
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button("SAVE WORLD"):
-        st.toast("Level Saved to Local Storage!")
-
-st.write("---")
-st.caption("AuraCraft Replica v2.0 // Private Use Only")
+# 7. Run the App
+app.run()
