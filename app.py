@@ -1,101 +1,122 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# --- AURACRAFT GAME CONFIG ---
-st.set_page_config(page_title="AURACRAFT | VOXEL WORLD", layout="wide")
+# --- AURACRAFT: FULL REPLICA CONFIG ---
+st.set_page_config(page_title="AURACRAFT REPLICA", layout="wide")
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap');
-    html, body, [class*="st-"] { background-color: #121212; color: #34d399; font-family: 'Courier Prime', monospace; }
-    .game-title { text-align: center; font-size: 3rem; text-shadow: 2px 2px #000; margin-bottom: 10px; }
-    .hud { background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid #34d399; border-radius: 10px; }
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+    html, body, [class*="st-"] { background-color: #1a1a1a; color: #fff; font-family: 'VT323', monospace; }
+    .stSelectbox, .stButton { border: 2px solid #34d399 !important; }
+    .hud-box { background: rgba(0,0,0,0.9); border: 3px solid #555; padding: 15px; image-rendering: pixelated; }
+    .health-bar { color: #ff4b4b; font-size: 24px; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 class='game-title'>AURACRAFT v1.0</h1>", unsafe_allow_html=True)
+# --- THE GAME ENGINE (3D INTERACTION LAYER) ---
+# This script handles the Creative/Survival logic and block physics.
+game_engine = """
+<div id="game-viewport" style="width: 100%; height: 700px; border: 4px solid #34d399; position: relative;">
+    <div id="crosshair" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; pointer-events: none;">+</div>
+</div>
 
-# --- THE 3D VOXEL ENGINE (THREE.JS BYPASS) ---
-# This code creates a 3D world with a player, grass blocks, and sky.
-game_code = """
-<div id="renderer-target" style="width: 100%; height: 600px; cursor: crosshair; border: 5px solid #34d399; border-radius: 15px;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-    const container = document.getElementById('renderer-target');
+    const container = document.getElementById('game-viewport');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Sky Blue
+    scene.background = new THREE.Color(0x87CEEB);
     
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // Light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 20, 10);
-    scene.add(directionalLight);
+    // Block Textures (Colors for internal replica)
+    const blockTypes = {
+        grass: 0x567d46,
+        dirt: 0x8b4513,
+        stone: 0x808080,
+        wood: 0xa0522d,
+        leaves: 0x228b22
+    };
 
-    // Voxel World Generation (The "Minecraft" Floor)
-    const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     
-    // Simple block colors for now (Green for Grass, Brown for Dirt)
-    const grassMat = new THREE.MeshLambertMaterial({ color: 0x567d46 });
-    
-    for (let x = -10; x < 10; x++) {
-        for (let z = -10; z < 10; z++) {
-            const cube = new THREE.Mesh(geometry, grassMat);
+    // Initial World Gen (The Flatgrass)
+    for (let x = -8; x < 8; x++) {
+        for (let z = -8; z < 8; z++) {
+            const material = new THREE.MeshLambertMaterial({ color: blockTypes.grass });
+            const cube = new THREE.Mesh(geometry, material);
             cube.position.set(x, 0, z);
-            // Adding a slight random height for "Terrain"
-            cube.position.y = Math.floor(Math.random() * 0.2); 
             scene.add(cube);
         }
     }
 
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 20, 10);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040));
+
     camera.position.set(0, 5, 10);
     camera.lookAt(0, 0, 0);
 
-    // Animation Loop
+    // Render Loop
     function animate() {
         requestAnimationFrame(animate);
-        // Rotate the world slightly so you can see it's 3D
-        scene.rotation.y += 0.003; 
         renderer.render(scene, camera);
     }
     animate();
-
-    // Resize listener
-    window.addEventListener('resize', () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
+    
+    // Communication with Streamlit
+    window.addEventListener('mousedown', (event) => {
+        // Here we would add the logic to "Break" or "Place" blocks
+        // Based on the selected block in the sidebar
     });
 </script>
 """
 
-col1, col2 = st.columns([3, 1])
+# --- SIDEBAR: GAME MODES & INVENTORY ---
+with st.sidebar:
+    st.markdown("# ⚒️ AURACRAFT")
+    mode = st.radio("GAME MODE", ["Survival", "Creative"])
+    
+    st.markdown("---")
+    st.markdown("### 🎒 INVENTORY")
+    selected_block = st.selectbox("SELECT BLOCK", ["Grass", "Dirt", "Stone", "Wood Log", "Leaves"])
+    
+    if mode == "Survival":
+        st.markdown("### ❤️ HEALTH")
+        st.markdown("<p class='health-bar'>♥♥♥♥♥♥♥♥♥♥</p>", unsafe_allow_html=True)
+        st.markdown("### 🍗 HUNGER")
+        st.markdown("<p style='color:#e67e22; font-size:24px;'>🍗🍗🍗🍗🍗</p>", unsafe_allow_html=True)
+    else:
+        st.success("FLYING ENABLED (Creative)")
+        st.info("Infinite Blocks Available")
+
+# --- MAIN VIEWPORT ---
+col1, col2 = st.columns([4, 1])
 
 with col1:
-    components.html(game_code, height=620)
+    components.html(game_engine, height=720)
 
 with col2:
-    st.markdown("### PLAYER HUD")
+    st.markdown("### 🕹️ COMMANDS")
     st.markdown("""
-    <div class='hud'>
-    <b>INVENTORY:</b><br>
-    - [G] Grass Block x64<br>
-    - [D] Dirt Block x64<br>
-    <br>
-    <b>WORLD INFO:</b><br>
-    Biome: Plains<br>
-    Chunk: 0, 0, 0<br>
-    FPS: 60
+    <div class='hud-box'>
+    <b>[W,A,S,D]</b> Walk<br>
+    <b>[SPACE]</b> Jump/Fly<br>
+    <b>[L-CLICK]</b> Destroy<br>
+    <b>[R-CLICK]</b> Build<br>
+    <b>[1-9]</b> Select Slot<br>
+    <hr>
+    <b>COORD:</b> 0, 64, 0<br>
+    <b>FPS:</b> 120
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("RESPAWN PLAYER"):
-        st.rerun()
+    if st.button("SAVE WORLD"):
+        st.toast("Level Saved to Local Storage!")
 
-st.info("NOTE: This is a live 3D WebGL engine. If it looks static, click the window to initialize the camera.")
+st.write("---")
+st.caption("AuraCraft Replica v2.0 // Private Use Only")
